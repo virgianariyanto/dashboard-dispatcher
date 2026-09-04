@@ -42,30 +42,36 @@ export default function DispatcherDashboardPage() {
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('harian');
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
 
-  const tabMeta: Record<NavigationTab, { title: string; subtitle: string }> = {
+  const tabMeta: Record<NavigationTab, { title: string; subtitle: string; category: string }> = {
     dashboard: {
-      title: 'DASHBOARD OVERVIEW',
-      subtitle: 'Ringkasan Ketersediaan Armada, Aktivitas Order & Metrik Kinerja Logistik',
+      title: 'Dashboard Overview',
+      subtitle: 'Ringkasan performa armada, metrik order & ketersediaan driver',
+      category: 'Operasional',
     },
     drivers: {
-      title: 'MONITORING DRIVER & TUGAS',
-      subtitle: 'Manajemen Data Driver Armada, Status Real-Time, Penugasan Cepat & Riwayat Tugas',
+      title: 'Monitoring Driver & Tugas',
+      subtitle: 'Pemantauan real-time armada, penugasan cepat & kelola driver',
+      category: 'Operasional',
     },
     'master-status': {
-      title: 'MASTER DATA STATUS DRIVER',
-      subtitle: 'Kelola Status Operasional Driver yang Terhubung Langsung ke Database PostgreSQL',
+      title: 'Master Status Driver',
+      subtitle: 'Data referensi status ketersediaan driver di database PostgreSQL',
+      category: 'Master Data',
     },
     'master-vehicles': {
-      title: 'MASTER DATA JENIS KENDARAAN',
-      subtitle: 'Kelola Tipe Armada, Kapasitas Muatan & Spesifikasi Kendaraan Logistik',
+      title: 'Master Jenis Kendaraan',
+      subtitle: 'Data armada pengiriman dan kapasitas muatan',
+      category: 'Master Data',
     },
     'master-branches': {
-      title: 'MASTER DATA CABANG & HUB',
-      subtitle: 'Kelola Titik Hub Operasional dan Wilayah Layanan Pengiriman',
+      title: 'Master Cabang & Hub',
+      subtitle: 'Data cabang operasional dan titik logistik pengiriman',
+      category: 'Master Data',
     },
     'master-cargo-types': {
-      title: 'MASTER DATA JENIS MUATAN & PAKET',
-      subtitle: 'Kelola Klasifikasi Jenis Muatan, Penanganan Khusus & Relasi Order Pengiriman',
+      title: 'Master Jenis Muatan',
+      subtitle: 'Klasifikasi muatan dan instruksi penanganan paket pengiriman',
+      category: 'Master Data',
     },
   };
 
@@ -454,14 +460,18 @@ export default function DispatcherDashboardPage() {
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* Header Bar */}
         <Header
+          category={tabMeta[activeTab].category}
           title={tabMeta[activeTab].title}
           subtitle={tabMeta[activeTab].subtitle}
+          showTimeFrame={activeTab === 'dashboard'}
           selectedBranch={selectedBranch}
           onSelectBranch={setSelectedBranch}
           timeFrame={timeFrame}
           onChangeTimeFrame={setTimeFrame}
           unassignedCount={unassignedOrders.length}
           readyDriverCount={readyDriversList.length}
+          isSyncing={isSyncing}
+          onRefresh={() => fetchDatabaseData(true)}
           onOpenNewOrder={() => {
             setPreSelectedDriverForOrder(null);
             setIsNewOrderOpen(true);
@@ -472,27 +482,6 @@ export default function DispatcherDashboardPage() {
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          
-          {/* PostgreSQL Database Status Bar & Manual Refresh */}
-          <div className="mb-4 flex items-center justify-between bg-slate-900/60 border border-slate-800/80 px-4 py-2 rounded-xl text-xs">
-            <div className="flex items-center gap-2 text-slate-300">
-              <Database className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-white">Database:</span>
-              <span className="text-emerald-400 font-mono">PostgreSQL 18 (dashboard_dispatcher)</span>
-              <span className="text-slate-500">•</span>
-              <span className="text-slate-400">Data terhubung & tersimpan permanen</span>
-            </div>
-
-            <button
-              onClick={() => fetchDatabaseData(true)}
-              disabled={isSyncing}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-medium transition-all active:scale-95"
-              title="Sinkronisasi ulang dengan database PostgreSQL"
-            >
-              <RefreshCw className={`w-3 h-3 text-blue-400 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span>{isSyncing ? 'Menyinkronkan...' : 'Refresh Data'}</span>
-            </button>
-          </div>
 
           {/* TAB 1: Dashboard Overview (Tabel monitoring driver telah dipisahkan ke tab tersendiri) */}
           {activeTab === 'dashboard' && (
