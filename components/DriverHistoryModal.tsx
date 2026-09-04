@@ -20,12 +20,14 @@ interface DriverHistoryModalProps {
   driver: Driver | null;
   isOpen: boolean;
   onClose: () => void;
+  onCompleteTask?: (orderNumber: string) => void;
 }
 
 export const DriverHistoryModal: React.FC<DriverHistoryModalProps> = ({
   driver,
   isOpen,
   onClose,
+  onCompleteTask,
 }) => {
   if (!isOpen || !driver) return null;
 
@@ -149,14 +151,25 @@ export const DriverHistoryModal: React.FC<DriverHistoryModalProps> = ({
                     <span className="text-slate-600">•</span>
                     <span className="text-xs font-semibold text-slate-200">{task.customer}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono">
-                      <Clock className="w-3 h-3 text-slate-500" />
-                      <span>{task.startTime} {task.endTime !== '-' ? `→ ${task.endTime}` : '(Sedang Berjalan)'}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono">
+                        <Clock className="w-3 h-3 text-slate-500" />
+                        <span>{task.startTime} {task.endTime !== '-' ? `→ ${task.endTime}` : '(Sedang Berjalan)'}</span>
+                      </div>
+                      {getTaskStatusBadge(task.status)}
+
+                      {task.status === 'Berjalan' && onCompleteTask && (
+                        <button
+                          onClick={() => onCompleteTask(task.orderNumber)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] transition-all shadow-sm active:scale-95 ml-1"
+                          title="Tandai tugas selesai"
+                        >
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Selesaikan</span>
+                        </button>
+                      )}
                     </div>
-                    {getTaskStatusBadge(task.status)}
                   </div>
-                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="flex items-start gap-1.5 text-slate-300">

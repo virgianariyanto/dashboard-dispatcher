@@ -10,12 +10,14 @@ import {
   Database, 
   ChevronRight,
   ShieldCheck,
-  Package
+  Package,
+  ClipboardList
 } from 'lucide-react';
 
 export type NavigationTab = 
   | 'dashboard' 
   | 'drivers' 
+  | 'orders'
   | 'master-status' 
   | 'master-vehicles' 
   | 'master-branches'
@@ -25,6 +27,7 @@ interface SidebarProps {
   activeTab: NavigationTab;
   onSelectTab: (tab: NavigationTab) => void;
   driverCount: number;
+  orderCount?: number;
   unassignedCount: number;
 }
 
@@ -32,6 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
   driverCount,
+  orderCount = 0,
   unassignedCount,
 }) => {
   return (
@@ -95,6 +99,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800/80 text-emerald-400 border border-emerald-500/20">
                 {driverCount}
+              </span>
+            </button>
+
+            {/* Monitoring Order */}
+            <button
+              onClick={() => onSelectTab('orders')}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left ${
+                activeTab === 'orders'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <ClipboardList className="w-4 h-4 text-blue-400" />
+                <span>Monitoring Order</span>
+              </div>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800/80 text-blue-400 border border-blue-500/20">
+                {orderCount}
               </span>
             </button>
           </nav>

@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, FileSpreadsheet, Printer, Download, CheckCircle, Calendar } from 'lucide-react';
-import { Driver, KPIData, TimeFrame } from '@/types/dispatcher';
+import { X, FileSpreadsheet, Printer, Download, CheckCircle, Calendar, Users, ClipboardList } from 'lucide-react';
+import { Driver, KPIData, TimeFrame, Order } from '@/types/dispatcher';
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   drivers: Driver[];
+  orders?: Order[];
   kpi: KPIData;
   currentTimeFrame: TimeFrame;
   selectedBranch: string;
@@ -17,10 +18,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   isOpen,
   onClose,
   drivers,
+  orders = [],
   kpi,
   currentTimeFrame,
   selectedBranch,
 }) => {
+  const [reportType, setReportType] = useState<'drivers' | 'orders'>('drivers');
   const [format, setFormat] = useState<'excel' | 'pdf'>('excel');
   const [reportPeriod, setReportPeriod] = useState<TimeFrame>(currentTimeFrame);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -28,70 +31,121 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   if (!isOpen) return null;
 
   const handleExportCSV = () => {
-    // Generate CSV data formatted for Excel with UTF-8 BOM
-    const headers = [
-      'No',
-      'ID Driver',
-      'Nama Driver',
-      'Plat Nomor',
-      'Jenis Kendaraan',
-      'Cabang Operasi',
-      'Status Driver',
-      'Jam Mulai',
-      'Jam Selesai',
-      'Total Tugas',
-      'Tugas Selesai',
-      'Tugas Berjalan',
-      'Tugas Pending',
-      'Tugas Cancel',
-      'Ketepatan Waktu (%)',
-      'Rating Bintang',
-      'Skor Performa',
-      'Keterangan',
-    ];
-
-    const rows = drivers.map((d, idx) => [
-      idx + 1,
-      `"${d.id}"`,
-      `"${d.name}"`,
-      `"${d.plateNumber}"`,
-      `"${d.vehicleType}"`,
-      `"${d.branch}"`,
-      `"${d.status}"`,
-      `"${d.startTime}"`,
-      `"${d.endTime}"`,
-      d.totalTasks,
-      d.completedTasks,
-      d.inProgressTasks,
-      d.pendingTasks,
-      d.cancelledTasks,
-      d.onTimeRate,
-      d.rating,
-      d.performanceScore,
-      `"${d.notes.replace(/"/g, '""')}"`,
-    ]);
-
-    // Prepend UTF-8 BOM for Excel compatibility
     const BOM = '\uFEFF';
-    const csvContent =
-      BOM +
-      `"REKAP MONITORING DISPATCHER DRIVER - PERIODE ${reportPeriod.toUpperCase()}"\n` +
-      `"Cabang: ${selectedBranch} | Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
-      headers.join(',') +
-      '\n' +
-      rows.map((r) => r.join(',')).join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute(
-      'download',
-      `Laporan_Dispatcher_${selectedBranch.replace(/\s+/g, '_')}_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (reportType === 'drivers') {
+      const headers = [
+        'No',
+        'ID Driver',
+        'Nama Driver',
+        'Plat Nomor',
+        'Jenis Kendaraan',
+        'Cabang Operasi',
+        'Status Driver',
+        'Jam Mulai',
+        'Jam Selesai',
+        'Total Tugas',
+        'Tugas Selesai',
+        'Tugas Berjalan',
+        'Tugas Pending',
+        'Tugas Cancel',
+        'Ketepatan Waktu (%)',
+        'Rating Bintang',
+        'Skor Performa',
+        'Keterangan',
+      ];
+
+      const rows = drivers.map((d, idx) => [
+        idx + 1,
+        `"${d.id}"`,
+        `"${d.name}"`,
+        `"${d.plateNumber}"`,
+        `"${d.vehicleType}"`,
+        `"${d.branch}"`,
+        `"${d.status}"`,
+        `"${d.startTime}"`,
+        `"${d.endTime}"`,
+        d.totalTasks,
+        d.completedTasks,
+        d.inProgressTasks,
+        d.pendingTasks,
+        d.cancelledTasks,
+        d.onTimeRate,
+        d.rating,
+        d.performanceScore,
+        `"${(d.notes || '').replace(/"/g, '""')}"`,
+      ]);
+
+      const csvContent =
+        BOM +
+        `"REKAP MONITORING DISPATCHER DRIVER - PERIODE ${reportPeriod.toUpperCase()}"\n` +
+        `"Cabang: ${selectedBranch} | Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
+        headers.join(',') +
+        '\n' +
+        rows.map((r) => r.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `Laporan_Driver_${selectedBranch.replace(/\s+/g, '_')}_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      const headers = [
+        'No',
+        'No Order',
+        'Nama Customer',
+        'Lokasi Penjemputan',
+        'Lokasi Pengantaran',
+        'Jenis Muatan',
+        'Prioritas',
+        'Driver Bertugas',
+        'Cabang',
+        'Status Pengiriman',
+        'Target Pengiriman',
+        'Waktu Dibuat',
+      ];
+
+      const rows = orders.map((o, idx) => [
+        idx + 1,
+        `"${o.orderNumber}"`,
+        `"${o.customer}"`,
+        `"${(o.pickupLocation || '').replace(/"/g, '""')}"`,
+        `"${(o.dropoffLocation || '').replace(/"/g, '""')}"`,
+        `"${o.packageType || '-'}"`,
+        `"${o.priority || 'Normal'}"`,
+        `"${o.assignedDriverName || 'Belum Ditugaskan'}"`,
+        `"${o.branch}"`,
+        `"${o.status}"`,
+        `"${o.targetDeliveryTime || '-'}"`,
+        `"${o.createdAt || '-'}"`,
+      ]);
+
+      const csvContent =
+        BOM +
+        `"REKAP MONITORING ORDER & LOGISTIK - PERIODE ${reportPeriod.toUpperCase()}"\n` +
+        `"Cabang: ${selectedBranch} | Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
+        headers.join(',') +
+        '\n' +
+        rows.map((r) => r.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `Laporan_Order_${selectedBranch.replace(/\s+/g, '_')}_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
 
     setDownloadSuccess(true);
     setTimeout(() => {
@@ -117,7 +171,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Export Laporan Dispatcher</h3>
-              <p className="text-xs text-slate-400">Ekspor rekap data monitoring driver ke Excel atau PDF</p>
+              <p className="text-xs text-slate-400">Ekspor rekap data driver atau order ke Excel / PDF</p>
             </div>
           </div>
           <button
@@ -130,6 +184,46 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
         {/* Modal Body */}
         <div className="p-5 space-y-4 text-xs">
+
+          {/* Tipe Laporan */}
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              Jenis Data yang Diekspor
+            </label>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setReportType('drivers')}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${
+                  reportType === 'drivers'
+                    ? 'bg-blue-600/20 border-blue-500 text-blue-300 ring-1 ring-blue-500/30'
+                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Users className="w-4 h-4 text-blue-400" />
+                <div className="text-left">
+                  <div className="font-bold text-xs">Kinerja Driver</div>
+                  <div className="text-[10px] text-slate-400">Status & Performa</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReportType('orders')}
+                className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${
+                  reportType === 'orders'
+                    ? 'bg-amber-600/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/30'
+                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                }`}
+              >
+                <ClipboardList className="w-4 h-4 text-amber-400" />
+                <div className="text-left">
+                  <div className="font-bold text-xs">Data Order</div>
+                  <div className="text-[10px] text-slate-400">Muatan & Pengiriman</div>
+                </div>
+              </button>
+            </div>
+          </div>
           
           {/* Format Selection */}
           <div>
@@ -140,34 +234,34 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <button
                 type="button"
                 onClick={() => setFormat('excel')}
-                className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+                className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                   format === 'excel'
                     ? 'bg-emerald-500/15 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500/30'
                     : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
                 }`}
               >
-                <FileSpreadsheet className="w-6 h-6 text-emerald-400" />
-                <span className="font-bold text-xs">Microsoft Excel (.CSV)</span>
-                <span className="text-[10px] text-slate-400 text-center">Kompatibel penuh Excel & Spreadsheet</span>
+                <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
+                <span className="font-bold text-xs">Excel (.CSV)</span>
+                <span className="text-[10px] text-slate-400 text-center">Kompatibel Excel & Spreadsheet</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setFormat('pdf')}
-                className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+                className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                   format === 'pdf'
                     ? 'bg-blue-500/15 border-blue-500 text-blue-300 ring-1 ring-blue-500/30'
                     : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
                 }`}
               >
-                <Printer className="w-6 h-6 text-blue-400" />
-                <span className="font-bold text-xs">Cetak / PDF Dokumen</span>
-                <span className="text-[10px] text-slate-400 text-center">Format siap cetak dan arsip resmi</span>
+                <Printer className="w-5 h-5 text-blue-400" />
+                <span className="font-bold text-xs">Cetak / PDF</span>
+                <span className="text-[10px] text-slate-400 text-center">Format siap cetak resmi</span>
               </button>
             </div>
           </div>
 
-          {/* Periode Rekap (Poin 6.11) */}
+          {/* Periode Rekap */}
           <div>
             <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-blue-400" />
@@ -194,21 +288,29 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {/* Summary Preview */}
           <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 space-y-1.5 text-slate-300">
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">Total Baris Driver:</span>
-              <span className="font-mono font-bold text-white">{drivers.length} Driver</span>
+              <span className="text-slate-400">Jumlah Data:</span>
+              <span className="font-mono font-bold text-white">
+                {reportType === 'drivers' ? `${drivers.length} Driver` : `${orders.length} Order`}
+              </span>
             </div>
             <div className="flex justify-between text-[11px]">
               <span className="text-slate-400">Cabang Terpilih:</span>
               <span className="font-medium text-blue-400">{selectedBranch}</span>
             </div>
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">Total Tugas Terdistribusi:</span>
-              <span className="font-mono font-bold text-emerald-400">{kpi.ordersCompleted} Selesai</span>
+              <span className="text-slate-400">
+                {reportType === 'drivers' ? 'Total Tugas Selesai:' : 'Status Order Selesai:'}
+              </span>
+              <span className="font-mono font-bold text-emerald-400">
+                {reportType === 'drivers'
+                  ? `${kpi.ordersCompleted} Tugas`
+                  : `${orders.filter((o) => o.status === 'Selesai').length} Selesai`}
+              </span>
             </div>
           </div>
 
           {downloadSuccess && (
-            <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-center text-xs font-semibold flex items-center justify-center gap-1.5">
+            <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-center text-xs font-semibold flex items-center justify-center gap-1.5 animate-fade-in">
               <CheckCircle className="w-4 h-4 text-emerald-400" />
               <span>File laporan berhasil diekspor!</span>
             </div>

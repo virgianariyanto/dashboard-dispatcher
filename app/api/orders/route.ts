@@ -153,35 +153,149 @@ export async function POST(request: Request) {
   }
 }
 
-// PATCH: Tugaskan order yang belum memiliki driver ke driver standby
+// PATCH: Kelola status order (Assign, Complete, Cancel)
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { orderId, driverId } = body;
+    const { orderId, driverId, action } = body;
 
-    if (!orderId || !driverId) {
+    if (!orderId) {
       return NextResponse.json(
-        { success: false, error: 'orderId dan driverId diperlukan' },
+        { success: false, error: 'orderId diperlukan' },
         { status: 400 }
       );
     }
 
-    const driver = await prisma.driver.findUnique({ where: { id: driverId } });
-    if (!driver) {
-      return NextResponse.json(
-        { success: false, error: 'Driver tidak ditemukan' },
-        { status: 404 }
-      );
-    }
+    const nowTime = new Date().toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     const result = await prisma.$transaction(async (tx) => {
       const targetOrder = await tx.order.findUnique({ where: { id: orderId } });
       if (!targetOrder) throw new Error('Order tidak ditemukan');
 
-      const nowTime = new Date().toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      // 1. AKSI: SELESAIKAN ORDER (COMPLETE)
+      if (action === 'complete') {
+        const updatedOrder = await tx.order.update({
+          where: { id: orderId },
+          data: {
+            status: 'Selesai',
+          },
+        });
+
+        if (targetOrder.assignedDriverId) {
+          // Update riwayat tugas
+          await tx.taskHistory.updateMany({
+            where: {
+              driverId: targetOrder.assignedDriverId,
+              orderNumber: targetOrder.orderNumber,
+              status: 'Berjalan',
+            },
+            data: {
+              status: 'Selesai',
+              endTime: nowTime,
+            },
+          });
+
+          // Update metrics driver
+          await tx.driver.update({
+            where: { id: targetOrder.assignedDriverId },
+            data: {
+              completedTasks: { increment: 1 },
+              inProgressTasks: { decrement: 1 },
+            },
+          });
+
+          // Cek apakah driver masih ada order berjalan lainnya
+          const otherActive = await tx.order.count({
+            where: {
+              assignedDriverId: targetOrder.assignedDriverId,
+              status: 'Berjalan',
+              id: { not: orderId },
+            },
+          });
+
+          if (otherActive === 0) {
+            const readyStatus = await tx.driverStatus.findFirst({
+              where: { code: 'READY' },
+            });
+
+            await tx.driver.update({
+              where: { id: targetOrder.assignedDriverId },
+              data: {
+                status: 'Ready',
+                statusId: readyStatus?.id || undefined,
+              },
+            });
+          }
+        }
+
+        return updatedOrder;
+      }
+
+      // 2. AKSI: BATALKAN ORDER (CANCEL)
+      if (action === 'cancel') {
+        const updatedOrder = await tx.order.update({
+          where: { id: orderId },
+          data: {
+            status: 'Dibatalkan',
+          },
+        });
+
+        if (targetOrder.assignedDriverId) {
+          await tx.taskHistory.updateMany({
+            where: {
+              driverId: targetOrder.assignedDriverId,
+              orderNumber: targetOrder.orderNumber,
+              status: 'Berjalan',
+            },
+            data: {
+              status: 'Cancel',
+            },
+          });
+
+          await tx.driver.update({
+            where: { id: targetOrder.assignedDriverId },
+            data: {
+              cancelledTasks: { increment: 1 },
+              inProgressTasks: { decrement: 1 },
+            },
+          });
+
+          const otherActive = await tx.order.count({
+            where: {
+              assignedDriverId: targetOrder.assignedDriverId,
+              status: 'Berjalan',
+              id: { not: orderId },
+            },
+          });
+
+          if (otherActive === 0) {
+            const readyStatus = await tx.driverStatus.findFirst({
+              where: { code: 'READY' },
+            });
+
+            await tx.driver.update({
+              where: { id: targetOrder.assignedDriverId },
+              data: {
+                status: 'Ready',
+                statusId: readyStatus?.id || undefined,
+              },
+            });
+          }
+        }
+
+        return updatedOrder;
+      }
+
+      // 3. AKSI: ASSIGN ORDER KE DRIVER
+      if (!driverId) {
+        throw new Error('driverId diperlukan untuk penugasan order');
+      }
+
+      const driver = await tx.driver.findUnique({ where: { id: driverId } });
+      if (!driver) throw new Error('Driver tidak ditemukan');
 
       // Update order
       const updatedOrder = await tx.order.update({
@@ -193,11 +307,16 @@ export async function PATCH(request: Request) {
         },
       });
 
-      // Update driver
+      // Update driver status ke Trip
+      const tripStatus = await tx.driverStatus.findFirst({
+        where: { code: 'TRIP' },
+      });
+
       await tx.driver.update({
         where: { id: driver.id },
         data: {
           status: 'Trip',
+          statusId: tripStatus?.id || undefined,
           totalTasks: { increment: 1 },
           inProgressTasks: { increment: 1 },
         },
@@ -223,10 +342,40 @@ export async function PATCH(request: Request) {
     });
 
     return NextResponse.json({ success: true, data: result });
-  } catch (error) {
-    console.error('Error assigning order to driver:', error);
+  } catch (error: any) {
+    console.error('Error updating order:', error);
     return NextResponse.json(
-      { success: false, error: 'Gagal menugaskan order ke driver' },
+      { success: false, error: error.message || 'Gagal memperbarui status order' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE: Hapus order dari database
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'ID Order diperlukan' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.order.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Order berhasil dihapus',
+    });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    return NextResponse.json(
+      { success: false, error: 'Gagal menghapus data order' },
       { status: 500 }
     );
   }

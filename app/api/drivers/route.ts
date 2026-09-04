@@ -68,6 +68,31 @@ export async function POST(request: Request) {
     ];
     const avatarUrl = body.avatarUrl || defaultAvatars[count % defaultAvatars.length];
 
+    // Resolve relational IDs
+    let resolvedStatusId = body.statusId;
+    if (!resolvedStatusId && status) {
+      const st = await prisma.driverStatus.findFirst({
+        where: { OR: [{ name: status }, { code: status }] },
+      });
+      if (st) resolvedStatusId = st.id;
+    }
+
+    let resolvedVehicleTypeId = body.vehicleTypeId;
+    if (!resolvedVehicleTypeId && vehicleType) {
+      const vh = await prisma.vehicleType.findFirst({
+        where: { OR: [{ name: vehicleType }, { code: vehicleType }] },
+      });
+      if (vh) resolvedVehicleTypeId = vh.id;
+    }
+
+    let resolvedBranchId = body.branchId;
+    if (!resolvedBranchId && branch) {
+      const br = await prisma.branch.findFirst({
+        where: { OR: [{ name: branch }, { code: branch }] },
+      });
+      if (br) resolvedBranchId = br.id;
+    }
+
     const newDriver = await prisma.driver.create({
       data: {
         id: generatedId,
@@ -89,6 +114,9 @@ export async function POST(request: Request) {
         onTimeRate: 100.0,
         rating: 5.0,
         performanceScore: 90,
+        statusId: resolvedStatusId || null,
+        vehicleTypeId: resolvedVehicleTypeId || null,
+        branchId: resolvedBranchId || null,
       },
       include: {
         taskHistories: true,
@@ -135,6 +163,31 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Resolve relational IDs
+    let resolvedStatusId = body.statusId;
+    if (!resolvedStatusId && status) {
+      const st = await prisma.driverStatus.findFirst({
+        where: { OR: [{ name: status }, { code: status }] },
+      });
+      if (st) resolvedStatusId = st.id;
+    }
+
+    let resolvedVehicleTypeId = body.vehicleTypeId;
+    if (!resolvedVehicleTypeId && vehicleType) {
+      const vh = await prisma.vehicleType.findFirst({
+        where: { OR: [{ name: vehicleType }, { code: vehicleType }] },
+      });
+      if (vh) resolvedVehicleTypeId = vh.id;
+    }
+
+    let resolvedBranchId = body.branchId;
+    if (!resolvedBranchId && branch) {
+      const br = await prisma.branch.findFirst({
+        where: { OR: [{ name: branch }, { code: branch }] },
+      });
+      if (br) resolvedBranchId = br.id;
+    }
+
     const updated = await prisma.driver.update({
       where: { id },
       data: {
@@ -147,6 +200,9 @@ export async function PUT(request: Request) {
         startTime,
         endTime,
         notes,
+        ...(resolvedStatusId ? { statusId: resolvedStatusId } : {}),
+        ...(resolvedVehicleTypeId ? { vehicleTypeId: resolvedVehicleTypeId } : {}),
+        ...(resolvedBranchId ? { branchId: resolvedBranchId } : {}),
       },
       include: {
         taskHistories: {
@@ -186,10 +242,35 @@ export async function PATCH(request: Request) {
       );
     }
 
+    // Resolve statusId
+    let resolvedStatusId = body.statusId;
+    if (!resolvedStatusId && status) {
+      const st = await prisma.driverStatus.findFirst({
+        where: { OR: [{ name: status }, { code: status }] },
+      });
+      if (st) resolvedStatusId = st.id;
+    }
+
+    // Jika driver diubah statusnya menjadi 'Izin' atau 'Off', alihkan order yang sedang berjalan kembali ke antrean unassigned
+    if (status === 'Izin' || status === 'Off') {
+      await prisma.order.updateMany({
+        where: {
+          assignedDriverId: driverId,
+          status: { in: ['Berjalan', 'Diterima'] },
+        },
+        data: {
+          status: 'Belum Ditugaskan',
+          assignedDriverId: null,
+          assignedDriverName: null,
+        },
+      });
+    }
+
     const updated = await prisma.driver.update({
       where: { id: driverId },
       data: {
         status,
+        ...(resolvedStatusId ? { statusId: resolvedStatusId } : {}),
         ...(notes !== undefined ? { notes } : {}),
       },
       include: {

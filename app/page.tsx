@@ -15,6 +15,7 @@ import { AlertBanner } from '@/components/AlertBanner';
 import { KPICards } from '@/components/KPICards';
 import { ChartsSection } from '@/components/ChartsSection';
 import { DriverMonitoringTable } from '@/components/DriverMonitoringTable';
+import { OrderMonitoringTable } from '@/components/OrderMonitoringTable';
 import { Sidebar, NavigationTab } from '@/components/Sidebar';
 import { MasterStatusView } from '@/components/MasterStatusView';
 import { MasterVehiclesView } from '@/components/MasterVehiclesView';
@@ -51,6 +52,11 @@ export default function DispatcherDashboardPage() {
     drivers: {
       title: 'Monitoring Driver & Tugas',
       subtitle: 'Pemantauan real-time armada, penugasan cepat & kelola driver',
+      category: 'Operasional',
+    },
+    orders: {
+      title: 'Monitoring Order & Logistik',
+      subtitle: 'Manajemen alur tugas pengiriman, rute & penyelesaian tugas delivery',
       category: 'Operasional',
     },
     'master-status': {
@@ -428,6 +434,123 @@ export default function DispatcherDashboardPage() {
     }
   };
 
+  // Handler: Complete an active order with PostgreSQL sync
+  const handleCompleteOrder = async (orderId: string) => {
+    const targetOrder = orders.find((o) => o.id === orderId);
+    const orderNum = targetOrder?.orderNumber || orderId;
+
+    // 1. Optimistic UI update
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: 'Selesai' } : o))
+    );
+
+    if (targetOrder?.assignedDriverId) {
+      const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      setDrivers((prev) =>
+        prev.map((d) => {
+          if (d.id === targetOrder.assignedDriverId) {
+            const remainingInProgress = Math.max(0, d.inProgressTasks - 1);
+            return {
+              ...d,
+              completedTasks: d.completedTasks + 1,
+              inProgressTasks: remainingInProgress,
+              status: remainingInProgress === 0 ? 'Ready' : d.status,
+              taskHistory: d.taskHistory.map((t) =>
+                t.orderNumber === targetOrder.orderNumber
+                  ? { ...t, status: 'Selesai', endTime: now }
+                  : t
+              ),
+            };
+          }
+          return d;
+        })
+      );
+    }
+
+    // 2. Persist to DB
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, action: 'complete' }),
+      });
+
+      if (res.ok) {
+        showToast(`Order ${orderNum} diselesaikan! Driver kembali Ready.`);
+        fetchDatabaseData();
+      }
+    } catch (err) {
+      console.error('Failed to complete order:', err);
+    }
+  };
+
+  // Handler: Cancel an order with PostgreSQL sync
+  const handleCancelOrder = async (orderId: string) => {
+    const targetOrder = orders.find((o) => o.id === orderId);
+    const orderNum = targetOrder?.orderNumber || orderId;
+
+    // 1. Optimistic UI update
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: 'Dibatalkan' } : o))
+    );
+
+    if (targetOrder?.assignedDriverId) {
+      const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      setDrivers((prev) =>
+        prev.map((d) => {
+          if (d.id === targetOrder.assignedDriverId) {
+            const remainingInProgress = Math.max(0, d.inProgressTasks - 1);
+            return {
+              ...d,
+              cancelledTasks: d.cancelledTasks + 1,
+              inProgressTasks: remainingInProgress,
+              status: remainingInProgress === 0 ? 'Ready' : d.status,
+              taskHistory: d.taskHistory.map((t) =>
+                t.orderNumber === targetOrder.orderNumber
+                  ? { ...t, status: 'Cancel', endTime: now }
+                  : t
+              ),
+            };
+          }
+          return d;
+        })
+      );
+    }
+
+    // 2. Persist to DB
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, action: 'cancel' }),
+      });
+
+      if (res.ok) {
+        showToast(`Order ${orderNum} telah dibatalkan.`);
+        fetchDatabaseData();
+      }
+    } catch (err) {
+      console.error('Failed to cancel order:', err);
+    }
+  };
+
+  // Handler: Delete order permanently
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus order ini dari database?')) return;
+    setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    try {
+      const res = await fetch(`/api/orders?id=${orderId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        showToast('Order berhasil dihapus dari PostgreSQL.');
+        fetchDatabaseData();
+      }
+    } catch (err) {
+      console.error('Failed to delete order:', err);
+    }
+  };
+
   const handleQuickAssignFromTable = (driver: Driver) => {
     setPreSelectedDriverForOrder(driver);
     setIsNewOrderOpen(true);
@@ -453,6 +576,7 @@ export default function DispatcherDashboardPage() {
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         driverCount={drivers.length}
+        orderCount={orders.length}
         unassignedCount={unassignedOrders.length}
       />
 
@@ -542,6 +666,24 @@ export default function DispatcherDashboardPage() {
             </div>
           )}
 
+          {/* TAB: Monitoring Order & Tugas */}
+          {activeTab === 'orders' && (
+            <OrderMonitoringTable
+              orders={orders}
+              drivers={drivers}
+              selectedBranch={selectedBranch}
+              onSelectBranch={setSelectedBranch}
+              onOpenNewOrder={() => {
+                setPreSelectedDriverForOrder(null);
+                setIsNewOrderOpen(true);
+              }}
+              onAssignOrder={() => setIsUnassignedOpen(true)}
+              onCompleteOrder={handleCompleteOrder}
+              onCancelOrder={handleCancelOrder}
+              onDeleteOrder={handleDeleteOrder}
+            />
+          )}
+
           {/* TAB 3: Master Data Status (Terhubung ke Table Driver) */}
           {activeTab === 'master-status' && (
             <MasterStatusView />
@@ -606,12 +748,19 @@ export default function DispatcherDashboardPage() {
         isOpen={!!selectedDriverForHistory}
         driver={selectedDriverForHistory}
         onClose={() => setSelectedDriverForHistory(null)}
+        onCompleteTask={(orderNum) => {
+          const ord = orders.find((o) => o.orderNumber === orderNum);
+          if (ord) {
+            handleCompleteOrder(ord.id);
+          }
+        }}
       />
 
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         drivers={branchFilteredDrivers}
+        orders={orders.filter((o) => selectedBranch === 'Semua Cabang' || o.branch === selectedBranch)}
         kpi={kpiData}
         currentTimeFrame={timeFrame}
         selectedBranch={selectedBranch}
