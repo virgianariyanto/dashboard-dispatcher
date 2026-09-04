@@ -13,7 +13,10 @@ import {
   PlusCircle, 
   Star, 
   MoreVertical,
-  ChevronDown
+  ChevronDown,
+  UserPlus,
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { Driver, DriverStatus } from '@/types/dispatcher';
 
@@ -26,6 +29,9 @@ interface DriverMonitoringTableProps {
   onSelectDriverForHistory: (driver: Driver) => void;
   onQuickAssign: (driver: Driver) => void;
   onChangeDriverStatus: (driverId: string, newStatus: DriverStatus) => void;
+  onOpenAddDriver: () => void;
+  onEditDriver: (driver: Driver) => void;
+  onDeleteDriver: (driver: Driver) => void;
 }
 
 export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
@@ -37,6 +43,9 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
   onSelectDriverForHistory,
   onQuickAssign,
   onChangeDriverStatus,
+  onOpenAddDriver,
+  onEditDriver,
+  onDeleteDriver,
 }) => {
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
@@ -107,14 +116,14 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Pantau status ketersediaan, jam kerja, pembagian tugas harian, dan evaluasi performa per driver.
+            Pantau status ketersediaan, jam kerja, pembagian tugas harian, serta kelola data armada driver.
           </p>
         </div>
 
-        {/* Filter Controls: Search & Status Dropdown */}
+        {/* Filter Controls: Search & Status Dropdown & Tambah Driver */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Box (Poin 6.2) */}
-          <div className="relative min-w-[220px]">
+          <div className="relative min-w-[200px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -149,6 +158,15 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
               ))}
             </select>
           </div>
+
+          {/* Tombol Tambah Driver Baru */}
+          <button
+            onClick={onOpenAddDriver}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-sm transition-all active:scale-95"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>+ Tambah Driver</span>
+          </button>
         </div>
       </div>
 
@@ -166,7 +184,7 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
               <th className="py-3.5 px-3 text-center text-amber-400">Pending</th>
               <th className="py-3.5 px-3 text-center text-rose-400">Cancel</th>
               <th className="py-3.5 px-3 text-center">Performa</th>
-              <th className="py-3.5 px-4 text-right">Aksi</th>
+              <th className="py-3.5 px-4 text-right">Aksi & Manajemen</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/80 text-xs">
@@ -264,7 +282,7 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                       </div>
                     </td>
 
-                    {/* Kolom 3: Jam Kerja (Poin 2.1) */}
+                    {/* Kolom 3: Jam Kerja */}
                     <td className="py-3 px-3 text-slate-300 font-mono">
                       <div className="flex items-center gap-1 text-[11px]">
                         <Clock className="w-3 h-3 text-slate-500" />
@@ -272,27 +290,27 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                       </div>
                     </td>
 
-                    {/* Kolom 4: Total Tugas (Poin 5) */}
+                    {/* Kolom 4: Total Tugas */}
                     <td className="py-3 px-3 text-center font-bold text-white font-mono text-sm">
                       {driver.totalTasks}
                     </td>
 
-                    {/* Kolom 5: Selesai (Poin 5) */}
+                    {/* Kolom 5: Selesai */}
                     <td className="py-3 px-3 text-center font-bold text-emerald-400 font-mono">
                       {driver.completedTasks}
                     </td>
 
-                    {/* Kolom 6: Berjalan (Poin 5) */}
+                    {/* Kolom 6: Berjalan */}
                     <td className="py-3 px-3 text-center font-bold text-blue-400 font-mono">
                       {driver.inProgressTasks}
                     </td>
 
-                    {/* Kolom 7: Pending (Poin 5) */}
+                    {/* Kolom 7: Pending */}
                     <td className="py-3 px-3 text-center font-bold text-amber-400 font-mono">
                       {driver.pendingTasks}
                     </td>
 
-                    {/* Kolom 8: Cancel (Poin 5) */}
+                    {/* Kolom 8: Cancel */}
                     <td className="py-3 px-3 text-center font-bold text-rose-400 font-mono">
                       {driver.cancelledTasks}
                     </td>
@@ -310,29 +328,46 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                       </div>
                     </td>
 
-                    {/* Kolom 10: Aksi (Riwayat & Penugasan Cepat) */}
+                    {/* Kolom 10: Aksi (Riwayat, Penugasan, Edit & Hapus Driver) */}
                     <td className="py-3 px-4 text-right">
-                      <div className="inline-flex items-center gap-2">
+                      <div className="inline-flex items-center gap-1.5">
                         {/* Tombol Assign Order Cepat */}
                         {canAssign && (
                           <button
                             onClick={() => onQuickAssign(driver)}
                             title="Tugaskan Order ke Driver ini"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 rounded-lg text-xs font-medium transition-all"
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 rounded-lg text-xs font-medium transition-all"
                           >
                             <PlusCircle className="w-3 h-3" />
                             <span>Tugaskan</span>
                           </button>
                         )}
 
-                        {/* Tombol Riwayat Tugas (Poin 6.5) */}
+                        {/* Tombol Riwayat Tugas */}
                         <button
                           onClick={() => onSelectDriverForHistory(driver)}
                           title="Lihat Riwayat Tugas Driver"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-lg text-xs font-medium transition-all"
+                          className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-lg transition-all"
                         >
-                          <History className="w-3 h-3 text-slate-400" />
-                          <span>Riwayat</span>
+                          <History className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Tombol Edit Driver */}
+                        <button
+                          onClick={() => onEditDriver(driver)}
+                          title="Edit Data Profil Driver"
+                          className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 hover:text-amber-300 border border-slate-700 rounded-lg transition-all"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Tombol Hapus Driver */}
+                        <button
+                          onClick={() => onDeleteDriver(driver)}
+                          title="Hapus Driver dari Database"
+                          className="p-1.5 bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -348,10 +383,10 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
       <div className="p-3 bg-slate-800/30 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="inline-block w-2 h-2 rounded-full bg-blue-400" />
-          <span>Tips: Klik label status driver untuk mengubah status ketersediaan secara langsung.</span>
+          <span>Tips: Klik label status untuk ganti status dinas, atau klik tombol Pensil untuk edit profil driver lengkap.</span>
         </div>
         <div className="text-slate-400 font-mono">
-          Update Otomatis • Realtime Dispatch Engine
+          PostgreSQL Database Sync Active
         </div>
       </div>
 

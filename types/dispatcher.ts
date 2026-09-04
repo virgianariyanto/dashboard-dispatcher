@@ -64,6 +64,8 @@ export interface Order {
   packageType: string;
   priority: 'Normal' | 'Tinggi' | 'Urgent';
   notes?: string;
+  branchId?: string;
+  cargoTypeId?: string;
 }
 
 export interface FilterState {

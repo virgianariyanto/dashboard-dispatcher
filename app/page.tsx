@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
   Driver, 
   Order, 
@@ -15,22 +15,59 @@ import { AlertBanner } from '@/components/AlertBanner';
 import { KPICards } from '@/components/KPICards';
 import { ChartsSection } from '@/components/ChartsSection';
 import { DriverMonitoringTable } from '@/components/DriverMonitoringTable';
+import { Sidebar, NavigationTab } from '@/components/Sidebar';
+import { MasterStatusView } from '@/components/MasterStatusView';
+import { MasterVehiclesView } from '@/components/MasterVehiclesView';
+import { MasterBranchesView } from '@/components/MasterBranchesView';
+import { MasterCargoTypesView } from '@/components/MasterCargoTypesView';
 import { NewOrderModal } from '@/components/NewOrderModal';
 import { DriverHistoryModal } from '@/components/DriverHistoryModal';
 import { ExportModal } from '@/components/ExportModal';
 import { UnassignedOrdersModal } from '@/components/UnassignedOrdersModal';
-import { Truck, CheckCircle2 } from 'lucide-react';
+import { DriverFormModal } from '@/components/DriverFormModal';
+import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
+import { Truck, CheckCircle2, Database, RefreshCw } from 'lucide-react';
 
 export default function DispatcherDashboardPage() {
-  // Main State
+  // Main State (loaded from PostgreSQL)
   const [drivers, setDrivers] = useState<Driver[]>(INITIAL_DRIVERS);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   
   // Filter States (Poin 6.1 & 6.2)
   const [selectedBranch, setSelectedBranch] = useState<string>('Semua Cabang');
   const [selectedStatus, setSelectedStatus] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('harian');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
+
+  const tabMeta: Record<NavigationTab, { title: string; subtitle: string }> = {
+    dashboard: {
+      title: 'DASHBOARD OVERVIEW',
+      subtitle: 'Ringkasan Ketersediaan Armada, Aktivitas Order & Metrik Kinerja Logistik',
+    },
+    drivers: {
+      title: 'MONITORING DRIVER & TUGAS',
+      subtitle: 'Manajemen Data Driver Armada, Status Real-Time, Penugasan Cepat & Riwayat Tugas',
+    },
+    'master-status': {
+      title: 'MASTER DATA STATUS DRIVER',
+      subtitle: 'Kelola Status Operasional Driver yang Terhubung Langsung ke Database PostgreSQL',
+    },
+    'master-vehicles': {
+      title: 'MASTER DATA JENIS KENDARAAN',
+      subtitle: 'Kelola Tipe Armada, Kapasitas Muatan & Spesifikasi Kendaraan Logistik',
+    },
+    'master-branches': {
+      title: 'MASTER DATA CABANG & HUB',
+      subtitle: 'Kelola Titik Hub Operasional dan Wilayah Layanan Pengiriman',
+    },
+    'master-cargo-types': {
+      title: 'MASTER DATA JENIS MUATAN & PAKET',
+      subtitle: 'Kelola Klasifikasi Jenis Muatan, Penanganan Khusus & Relasi Order Pengiriman',
+    },
+  };
 
   // Modal States
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
@@ -38,6 +75,11 @@ export default function DispatcherDashboardPage() {
   const [isUnassignedOpen, setIsUnassignedOpen] = useState(false);
   const [selectedDriverForHistory, setSelectedDriverForHistory] = useState<Driver | null>(null);
   const [preSelectedDriverForOrder, setPreSelectedDriverForOrder] = useState<Driver | null>(null);
+
+  // Driver CRUD Modal States
+  const [isDriverFormOpen, setIsDriverFormOpen] = useState(false);
+  const [driverToEdit, setDriverToEdit] = useState<Driver | null>(null);
+  const [driverToDelete, setDriverToDelete] = useState<Driver | null>(null);
 
   // Success notification toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -48,6 +90,41 @@ export default function DispatcherDashboardPage() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  // Fetch data from PostgreSQL via Next.js API
+  const fetchDatabaseData = useCallback(async (showIndicator = false) => {
+    if (showIndicator) setIsSyncing(true);
+    try {
+      const [driversRes, ordersRes] = await Promise.all([
+        fetch('/api/drivers'),
+        fetch('/api/orders'),
+      ]);
+
+      if (driversRes.ok) {
+        const driversData = await driversRes.json();
+        if (driversData.success && Array.isArray(driversData.data)) {
+          setDrivers(driversData.data);
+        }
+      }
+
+      if (ordersRes.ok) {
+        const ordersData = await ordersRes.json();
+        if (ordersData.success && Array.isArray(ordersData.data)) {
+          setOrders(ordersData.data);
+        }
+      }
+    } catch (err) {
+      console.warn('Menggunakan fallback data lokal:', err);
+    } finally {
+      setIsLoading(false);
+      if (showIndicator) setIsSyncing(false);
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    fetchDatabaseData();
+  }, [fetchDatabaseData]);
 
   // Branch filtered drivers
   const branchFilteredDrivers = useMemo(() => {
@@ -129,8 +206,9 @@ export default function DispatcherDashboardPage() {
     };
   }, [branchFilteredDrivers, unassignedOrders, timeFrame]);
 
-  // Handler: Change driver status directly
-  const handleChangeDriverStatus = (driverId: string, newStatus: DriverStatus) => {
+  // Handler: Change driver status directly with PostgreSQL persistence
+  const handleChangeDriverStatus = async (driverId: string, newStatus: DriverStatus) => {
+    // 1. Optimistic UI update
     setDrivers((prev) =>
       prev.map((d) => {
         if (d.id === driverId) {
@@ -139,7 +217,7 @@ export default function DispatcherDashboardPage() {
             status: newStatus,
             notes:
               newStatus === 'Izin'
-                ? 'Izin tidak bertugas (Diperbarui oleh Dispatcher)'
+                ? 'Izin tidak bertugas (Diperbarui via Dispatcher)'
                 : newStatus === 'Off'
                 ? 'Jadwal Libur/Off'
                 : d.notes,
@@ -148,15 +226,90 @@ export default function DispatcherDashboardPage() {
         return d;
       })
     );
-    showToast(`Status ${driverId} berhasil diubah menjadi ${newStatus}`);
+
+    // 2. Persist to PostgreSQL API
+    try {
+      const res = await fetch('/api/drivers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          driverId,
+          status: newStatus,
+          notes:
+            newStatus === 'Izin'
+              ? 'Izin tidak bertugas (Diperbarui via Dispatcher)'
+              : newStatus === 'Off'
+              ? 'Jadwal Libur/Off'
+              : undefined,
+        }),
+      });
+
+      if (res.ok) {
+        showToast(`Status ${driverId} disimpan ke PostgreSQL: ${newStatus}`);
+      }
+    } catch (err) {
+      console.error('Failed to update status in DB:', err);
+    }
   };
 
-  // Handler: Create & Assign new order
-  const handleSaveNewOrder = (newOrder: Order) => {
+  // Handler: Save Driver Profile (Create or Edit)
+  const handleSaveDriverProfile = async (driverData: Partial<Driver>) => {
+    const isEdit = !!driverData.id;
+
+    try {
+      const res = await fetch('/api/drivers', {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(driverData),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        if (result.success && result.data) {
+          if (isEdit) {
+            setDrivers((prev) =>
+              prev.map((d) => (d.id === result.data.id ? { ...d, ...result.data } : d))
+            );
+            showToast(`Data driver ${result.data.name} berhasil diperbarui di PostgreSQL!`);
+          } else {
+            setDrivers((prev) => [result.data, ...prev]);
+            showToast(`Driver baru ${result.data.name} (${result.data.id}) berhasil didaftarkan ke PostgreSQL!`);
+          }
+        }
+      } else {
+        alert('Gagal menyimpan data driver.');
+      }
+    } catch (err) {
+      console.error('Failed to save driver profile:', err);
+    }
+  };
+
+  // Handler: Delete Driver
+  const handleConfirmDeleteDriver = async (driverId: string) => {
+    try {
+      const res = await fetch(`/api/drivers?id=${driverId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        setDrivers((prev) => prev.filter((d) => d.id !== driverId));
+        showToast(`Driver ${driverId} berhasil dihapus dari PostgreSQL.`);
+        // Refresh orders as some might have become unassigned
+        fetchDatabaseData();
+      } else {
+        alert('Gagal menghapus driver.');
+      }
+    } catch (err) {
+      console.error('Failed to delete driver:', err);
+    }
+  };
+
+  // Handler: Create & Assign new order with PostgreSQL persistence
+  const handleSaveNewOrder = async (newOrder: Order) => {
+    // 1. Optimistic UI update
     setOrders((prev) => [newOrder, ...prev]);
 
     if (newOrder.assignedDriverId) {
-      // Update driver statistics and append history
       const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
       const newTaskHistory: TaskHistoryItem = {
         id: `TSK-${Date.now()}`,
@@ -184,14 +337,27 @@ export default function DispatcherDashboardPage() {
           return d;
         })
       );
-      showToast(`Order ${newOrder.orderNumber} berhasil dibuat & ditugaskan ke ${newOrder.assignedDriverName}!`);
-    } else {
-      showToast(`Order ${newOrder.orderNumber} berhasil dibuat (Belum Ditugaskan).`);
+    }
+
+    // 2. Save to PostgreSQL
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOrder),
+      });
+
+      if (res.ok) {
+        showToast(`Order ${newOrder.orderNumber} tersimpan permanen di PostgreSQL!`);
+        fetchDatabaseData();
+      }
+    } catch (err) {
+      console.error('Failed to create order in DB:', err);
     }
   };
 
-  // Handler: Assign unassigned order to a driver
-  const handleAssignOrderToDriver = (orderId: string, driverId: string) => {
+  // Handler: Assign unassigned order to a driver with PostgreSQL persistence
+  const handleAssignOrderToDriver = async (orderId: string, driverId: string) => {
     const driver = drivers.find((d) => d.id === driverId);
     if (!driver) return;
 
@@ -211,7 +377,7 @@ export default function DispatcherDashboardPage() {
       notes: targetOrder.notes || 'Penugasan cepat dispatcher',
     };
 
-    // Update order
+    // 1. Optimistic UI update
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
@@ -225,7 +391,6 @@ export default function DispatcherDashboardPage() {
       )
     );
 
-    // Update driver
     setDrivers((prev) =>
       prev.map((d) =>
         d.id === driverId
@@ -240,7 +405,21 @@ export default function DispatcherDashboardPage() {
       )
     );
 
-    showToast(`Order ${targetOrder.orderNumber} berhasil ditugaskan ke ${driver.name}!`);
+    // 2. Persist to PostgreSQL
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId, driverId }),
+      });
+
+      if (res.ok) {
+        showToast(`Order ${targetOrder.orderNumber} berhasil ditugaskan & disimpan di PostgreSQL!`);
+        fetchDatabaseData();
+      }
+    } catch (err) {
+      console.error('Failed to assign order in DB:', err);
+    }
   };
 
   const handleQuickAssignFromTable = (driver: Driver) => {
@@ -253,7 +432,7 @@ export default function DispatcherDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100">
+    <div className="min-h-screen flex bg-[#090d16] text-slate-100">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -263,79 +442,169 @@ export default function DispatcherDashboardPage() {
         </div>
       )}
 
-      {/* Header Bar */}
-      <Header
-        selectedBranch={selectedBranch}
-        onSelectBranch={setSelectedBranch}
-        timeFrame={timeFrame}
-        onChangeTimeFrame={setTimeFrame}
+      {/* Left Sidebar Navigation */}
+      <Sidebar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        driverCount={drivers.length}
         unassignedCount={unassignedOrders.length}
-        readyDriverCount={readyDriversList.length}
-        onOpenNewOrder={() => {
-          setPreSelectedDriverForOrder(null);
-          setIsNewOrderOpen(true);
-        }}
-        onOpenExport={() => setIsExportOpen(true)}
-        onOpenUnassignedList={() => setIsUnassignedOpen(true)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        
-        {/* Peringatan & Notifikasi Dispatcher (Poin 6.7 & 6.8) */}
-        <AlertBanner
+      {/* Main Content Viewport */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        {/* Header Bar */}
+        <Header
+          title={tabMeta[activeTab].title}
+          subtitle={tabMeta[activeTab].subtitle}
+          selectedBranch={selectedBranch}
+          onSelectBranch={setSelectedBranch}
+          timeFrame={timeFrame}
+          onChangeTimeFrame={setTimeFrame}
           unassignedCount={unassignedOrders.length}
           readyDriverCount={readyDriversList.length}
           onOpenNewOrder={() => {
             setPreSelectedDriverForOrder(null);
             setIsNewOrderOpen(true);
           }}
-          onScrollToTable={scrollToTable}
+          onOpenExport={() => setIsExportOpen(true)}
+          onOpenUnassignedList={() => setIsUnassignedOpen(true)}
         />
 
-        {/* Bagian Atas: Indikator KPI Utama (Poin 3 & Poin 7) */}
-        <KPICards 
-          kpi={kpiData} 
-          onFilterStatus={(status) => setSelectedStatus(status)} 
-        />
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          
+          {/* PostgreSQL Database Status Bar & Manual Refresh */}
+          <div className="mb-4 flex items-center justify-between bg-slate-900/60 border border-slate-800/80 px-4 py-2 rounded-xl text-xs">
+            <div className="flex items-center gap-2 text-slate-300">
+              <Database className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold text-white">Database:</span>
+              <span className="text-emerald-400 font-mono">PostgreSQL 18 (dashboard_dispatcher)</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-slate-400">Data terhubung & tersimpan permanen</span>
+            </div>
 
-        {/* Bagian Tengah: Visualisasi Grafik & Leaderboard (Poin 2.5, 7, 6.9, 6.10) */}
-        <ChartsSection
-          drivers={branchFilteredDrivers}
-          kpi={kpiData}
-          onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
-        />
-
-        {/* Bagian Bawah: Tabel Monitoring Driver & Tugas (Poin 2.1, 5, 7) */}
-        <div ref={tableRef}>
-          <DriverMonitoringTable
-            drivers={displayDrivers}
-            selectedStatus={selectedStatus}
-            onSelectStatus={setSelectedStatus}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
-            onQuickAssign={handleQuickAssignFromTable}
-            onChangeDriverStatus={handleChangeDriverStatus}
-          />
-        </div>
-
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/60 py-4 text-center text-xs text-slate-500 no-print">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 text-blue-500" />
-            <span className="font-semibold text-slate-400">Dashboard Monitoring Driver & Dispatcher Engine</span>
+            <button
+              onClick={() => fetchDatabaseData(true)}
+              disabled={isSyncing}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] font-medium transition-all active:scale-95"
+              title="Sinkronisasi ulang dengan database PostgreSQL"
+            >
+              <RefreshCw className={`w-3 h-3 text-blue-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span>{isSyncing ? 'Menyinkronkan...' : 'Refresh Data'}</span>
+            </button>
           </div>
-          <div>
-            Prinsip: Sederhana • Cepat Dibaca • Pengambilan Keputusan Efisien
+
+          {/* TAB 1: Dashboard Overview (Tabel monitoring driver telah dipisahkan ke tab tersendiri) */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              {/* Peringatan & Notifikasi Dispatcher (Poin 6.7 & 6.8) */}
+              <AlertBanner
+                unassignedCount={unassignedOrders.length}
+                readyDriverCount={readyDriversList.length}
+                onOpenNewOrder={() => {
+                  setPreSelectedDriverForOrder(null);
+                  setIsNewOrderOpen(true);
+                }}
+                onScrollToTable={() => setActiveTab('drivers')}
+              />
+
+              {/* Bagian Atas: Indikator KPI Utama (Poin 3 & Poin 7) */}
+              <KPICards 
+                kpi={kpiData} 
+                onFilterStatus={(status) => {
+                  setSelectedStatus(status);
+                  setActiveTab('drivers');
+                }} 
+              />
+
+              {/* Bagian Tengah: Visualisasi Grafik & Leaderboard (Poin 2.5, 7, 6.9, 6.10) */}
+              <ChartsSection
+                drivers={branchFilteredDrivers}
+                kpi={kpiData}
+                onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
+              />
+            </div>
+          )}
+
+          {/* TAB 2: Monitoring Driver & Tugas (Menu baru terpisah dari dashboard) */}
+          {activeTab === 'drivers' && (
+            <div ref={tableRef}>
+              <DriverMonitoringTable
+                drivers={displayDrivers}
+                selectedStatus={selectedStatus}
+                onSelectStatus={setSelectedStatus}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
+                onQuickAssign={handleQuickAssignFromTable}
+                onChangeDriverStatus={handleChangeDriverStatus}
+                onOpenAddDriver={() => {
+                  setDriverToEdit(null);
+                  setIsDriverFormOpen(true);
+                }}
+                onEditDriver={(driver) => {
+                  setDriverToEdit(driver);
+                  setIsDriverFormOpen(true);
+                }}
+                onDeleteDriver={(driver) => {
+                  setDriverToDelete(driver);
+                }}
+              />
+            </div>
+          )}
+
+          {/* TAB 3: Master Data Status (Terhubung ke Table Driver) */}
+          {activeTab === 'master-status' && (
+            <MasterStatusView />
+          )}
+
+          {/* TAB 4: Master Data Jenis Kendaraan (Terhubung ke Table Driver) */}
+          {activeTab === 'master-vehicles' && (
+            <MasterVehiclesView />
+          )}
+
+          {/* TAB 5: Master Data Cabang (Terhubung ke Table Driver) */}
+          {activeTab === 'master-branches' && (
+            <MasterBranchesView />
+          )}
+
+          {/* TAB 6: Master Data Jenis Muatan (Terhubung ke Table Order) */}
+          {activeTab === 'master-cargo-types' && (
+            <MasterCargoTypesView />
+          )}
+
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-800/80 bg-slate-950/60 py-4 text-center text-xs text-slate-500 no-print">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-blue-500" />
+              <span className="font-semibold text-slate-400">Dashboard Monitoring Driver & Dispatcher Engine</span>
+            </div>
+            <div className="text-slate-400">
+              Terhubung ke PostgreSQL Database • Master Data Relasional Aktif
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+
+      </div>
 
       {/* Modals */}
+      <DriverFormModal
+        isOpen={isDriverFormOpen}
+        onClose={() => setIsDriverFormOpen(false)}
+        driverToEdit={driverToEdit}
+        onSaveDriver={handleSaveDriverProfile}
+      />
+
+      <DeleteConfirmModal
+        isOpen={!!driverToDelete}
+        driver={driverToDelete}
+        onClose={() => setDriverToDelete(null)}
+        onConfirmDelete={handleConfirmDeleteDriver}
+      />
+
       <NewOrderModal
         isOpen={isNewOrderOpen}
         onClose={() => setIsNewOrderOpen(false)}

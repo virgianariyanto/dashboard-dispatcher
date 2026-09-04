@@ -15,6 +15,8 @@ import { TimeFrame } from '@/types/dispatcher';
 import { BRANCH_LIST } from '@/data/initialData';
 
 interface HeaderProps {
+  title?: string;
+  subtitle?: string;
   selectedBranch: string;
   onSelectBranch: (branch: string) => void;
   timeFrame: TimeFrame;
@@ -27,6 +29,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  title,
+  subtitle,
   selectedBranch,
   onSelectBranch,
   timeFrame,
@@ -80,14 +84,18 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-                  DASHBOARD MONITORING DRIVER
+                  {title || 'DASHBOARD MONITORING DRIVER'}
                 </h1>
                 <span className="bg-blue-500/20 text-blue-300 text-xs font-semibold px-2 py-0.5 rounded-full border border-blue-400/30">
                   DISPATCHER OPS
                 </span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500/15 text-emerald-400 text-[11px] font-medium px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  PostgreSQL Active
+                </span>
               </div>
               <p className="text-xs text-slate-400">
-                Sistem Monitoring Ketersediaan Armada, Aktivitas Order & Kinerja Driver
+                {subtitle || 'Sistem Monitoring Ketersediaan Armada, Aktivitas Order & Kinerja Driver (PostgreSQL 18)'}
               </p>
             </div>
           </div>

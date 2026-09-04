@@ -24,10 +24,16 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropoffLocation, setDropoffLocation] = useState('');
   const [branch, setBranch] = useState('Jakarta Pusat');
-  const [packageType, setPackageType] = useState('Paket Reguler');
+  const [packageType, setPackageType] = useState('Paket Reguler (Kardus/Box)');
   const [priority, setPriority] = useState<'Normal' | 'Tinggi' | 'Urgent'>('Normal');
   const [assignedDriverId, setAssignedDriverId] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Master options from PostgreSQL
+  const [branchList, setBranchList] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [cargoList, setCargoList] = useState<{ id: string; name: string; code: string; category: string }[]>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  const [selectedCargoTypeId, setSelectedCargoTypeId] = useState<string>('');
 
   // Filter available drivers (Ready or Menunggu Assignment)
   const availableDrivers = drivers.filter(
@@ -35,13 +41,59 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   );
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    const loadMasters = async () => {
+      try {
+        const [branchesRes, cargoRes] = await Promise.all([
+          fetch('/api/master/branches'),
+          fetch('/api/master/cargo-types'),
+        ]);
+
+        if (branchesRes.ok) {
+          const bJson = await branchesRes.json();
+          if (bJson.success && Array.isArray(bJson.data)) {
+            setBranchList(bJson.data);
+            if (!selectedBranchId && bJson.data.length > 0) {
+              const defaultBranch = preSelectedDriver 
+                ? bJson.data.find((b: any) => b.name === preSelectedDriver.branch) || bJson.data[0]
+                : bJson.data[0];
+              setBranch(defaultBranch.name);
+              setSelectedBranchId(defaultBranch.id);
+            }
+          }
+        }
+
+        if (cargoRes.ok) {
+          const cJson = await cargoRes.json();
+          if (cJson.success && Array.isArray(cJson.data)) {
+            setCargoList(cJson.data);
+            if (!selectedCargoTypeId && cJson.data.length > 0) {
+              setPackageType(cJson.data[0].name);
+              setSelectedCargoTypeId(cJson.data[0].id);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed loading master options:', err);
+      }
+    };
+
+    loadMasters();
+  }, [isOpen, preSelectedDriver, selectedBranchId, selectedCargoTypeId]);
+
+  useEffect(() => {
     if (preSelectedDriver) {
       setAssignedDriverId(preSelectedDriver.id);
       setBranch(preSelectedDriver.branch);
+      if (branchList.length > 0) {
+        const match = branchList.find((b) => b.name === preSelectedDriver.branch);
+        if (match) setSelectedBranchId(match.id);
+      }
     } else {
       setAssignedDriverId('');
     }
-  }, [preSelectedDriver, isOpen]);
+  }, [preSelectedDriver, isOpen, branchList]);
 
   if (!isOpen) return null;
 
@@ -70,6 +122,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
       packageType,
       priority,
       notes,
+      branchId: selectedBranchId || undefined,
+      cargoTypeId: selectedCargoTypeId || undefined,
     };
 
     onSaveOrder(newOrder);
@@ -159,33 +213,61 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
           {/* Cabang & Jenis Paket */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                Cabang Operasional
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span>Cabang Operasional</span>
+                <span className="text-[9px] text-emerald-400 font-mono">Master Branch</span>
               </label>
               <select
                 value={branch}
-                onChange={(e) => setBranch(e.target.value)}
+                onChange={(e) => {
+                  const bName = e.target.value;
+                  setBranch(bName);
+                  const found = branchList.find((b) => b.name === bName);
+                  if (found) setSelectedBranchId(found.id);
+                }}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
               >
-                {BRANCH_LIST.filter((b) => b !== 'Semua Cabang').map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
+                {branchList.length > 0
+                  ? branchList.map((b) => (
+                      <option key={b.id} value={b.name}>
+                        {b.name} ({b.code})
+                      </option>
+                    ))
+                  : BRANCH_LIST.filter((b) => b !== 'Semua Cabang').map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                Jenis Muatan / Paket
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span>Jenis Muatan / Paket</span>
+                <span className="text-[9px] text-orange-400 font-mono">Master Cargo</span>
               </label>
               <select
                 value={packageType}
-                onChange={(e) => setPackageType(e.target.value)}
+                onChange={(e) => {
+                  const cName = e.target.value;
+                  setPackageType(cName);
+                  const found = cargoList.find((c) => c.name === cName);
+                  if (found) setSelectedCargoTypeId(found.id);
+                }}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
               >
-                <option value="Paket Reguler (Kardus)">Paket Reguler (Kardus)</option>
-                <option value="Dokumen Penting">Dokumen Penting</option>
-                <option value="Makanan & Minuman (Thermal Box)">Makanan & Minuman (Thermal Box)</option>
-                <option value="Barang Elektronik">Barang Elektronik</option>
-                <option value="Farmasi / Medis">Farmasi / Medis</option>
+                {cargoList.length > 0
+                  ? cargoList.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name} [{c.category}]
+                      </option>
+                    ))
+                  : (
+                    <>
+                      <option value="Paket Reguler (Kardus/Box)">Paket Reguler (Kardus/Box)</option>
+                      <option value="Dokumen & Surat Berharga">Dokumen & Surat Berharga</option>
+                      <option value="Elektronik & Barang Pecah Belah">Elektronik & Barang Pecah Belah</option>
+                      <option value="Makanan & Minuman Segar">Makanan & Minuman Segar</option>
+                      <option value="Farmasi & Sampel Medis">Farmasi & Sampel Medis</option>
+                    </>
+                  )}
               </select>
             </div>
           </div>
