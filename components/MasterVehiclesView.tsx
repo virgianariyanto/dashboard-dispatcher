@@ -69,41 +69,47 @@ export const MasterVehiclesView: React.FC = () => {
     setCode(item.code);
     setName(item.name);
     setCategory(item.category || 'Motor');
-    setMaxWeightCapacity(String(item.maxWeightCapacity || 0));
+    setMaxWeightCapacity(item.maxWeightCapacity ? String(item.maxWeightCapacity) : '0');
     setDescription(item.description || '');
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isEdit = !!vehicleToEdit;
-
     const payload = {
-      ...(isEdit ? { id: vehicleToEdit.id } : {}),
-      code,
-      name,
+      code: code.trim().toUpperCase(),
+      name: name.trim(),
       category,
       maxWeightCapacity: parseFloat(maxWeightCapacity) || 0,
-      description,
+      description: description.trim(),
     };
 
     try {
-      const res = await fetch('/api/master/vehicles', {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        setIsModalOpen(false);
-        showToast(`Jenis kendaraan "${name}" berhasil ${isEdit ? 'diperbarui' : 'ditambahkan'} di PostgreSQL!`);
-        fetchVehicles();
+      if (vehicleToEdit) {
+        const res = await fetch('/api/master/vehicles', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: vehicleToEdit.id, ...payload }),
+        });
+        if (res.ok) {
+          showToast('Jenis kendaraan berhasil diperbarui!');
+          fetchVehicles();
+          setIsModalOpen(false);
+        }
       } else {
-        const data = await res.json();
-        alert(data.error || 'Gagal menyimpan jenis kendaraan');
+        const res = await fetch('/api/master/vehicles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          showToast('Jenis kendaraan baru berhasil ditambahkan!');
+          fetchVehicles();
+          setIsModalOpen(false);
+        }
       }
     } catch (err) {
-      console.error(err);
+      console.error('Submit error:', err);
     }
   };
 
@@ -114,14 +120,12 @@ export const MasterVehiclesView: React.FC = () => {
         method: 'DELETE',
       });
       if (res.ok) {
-        setVehicleToDelete(null);
-        showToast(`Kendaraan "${vehicleToDelete.name}" berhasil dihapus.`);
+        showToast('Jenis kendaraan berhasil dihapus!');
         fetchVehicles();
-      } else {
-        alert('Gagal menghapus jenis kendaraan');
+        setVehicleToDelete(null);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Delete error:', err);
     }
   };
 
@@ -137,17 +141,17 @@ export const MasterVehiclesView: React.FC = () => {
       )}
 
       {/* Header View */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900/80 border border-slate-800 p-5 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 p-5 rounded-2xl shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
               <Car className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white tracking-tight">
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">
                 Master Data Jenis Kendaraan
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Kelola kategori armada operasional (Motor, Mobil Box, Truk, Pick-Up) dan spesifikasi kapasitas muat.
               </p>
             </div>
@@ -156,7 +160,7 @@ export const MasterVehiclesView: React.FC = () => {
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-600/30 transition-all active:scale-95 shrink-0"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-all active:scale-95 shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>+ Tambah Kendaraan Baru</span>
@@ -164,11 +168,11 @@ export const MasterVehiclesView: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-md">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-xs text-slate-700">
             <thead>
-              <tr className="bg-slate-800/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+              <tr className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                 <th className="py-3.5 px-4">Kode</th>
                 <th className="py-3.5 px-4">Nama Jenis Kendaraan</th>
                 <th className="py-3.5 px-4">Kategori</th>
@@ -178,55 +182,53 @@ export const MasterVehiclesView: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                  <td colSpan={7} className="py-8 text-center text-slate-500">
                     Memuat data kendaraan dari PostgreSQL...
                   </td>
                 </tr>
               ) : vehicles.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-400">
+                  <td colSpan={7} className="py-8 text-center text-slate-500">
                     Belum ada data kendaraan.
                   </td>
                 </tr>
               ) : (
                 vehicles.map((v) => (
-                  <tr key={v.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-blue-400">
+                  <tr key={v.id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-blue-600">
                       {v.code}
                     </td>
-                    <td className="py-3 px-4 font-semibold text-white">
+                    <td className="py-3 px-4 font-semibold text-slate-900">
                       {v.name}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
                         {v.category}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-center font-mono text-emerald-400 font-bold">
+                    <td className="py-3 px-3 text-center font-mono text-emerald-700 font-bold">
                       {v.maxWeightCapacity ?? 0} kg
                     </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-slate-200">
+                    <td className="py-3 px-3 text-center font-mono font-semibold text-slate-800">
                       {v.driverCount ?? 0} driver
                     </td>
-                    <td className="py-3 px-4 text-slate-400 text-[11px] max-w-xs truncate">
+                    <td className="py-3 px-4 text-slate-500 text-[11px] max-w-xs truncate">
                       {v.description || '-'}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="inline-flex items-center gap-1.5">
                         <button
                           onClick={() => handleOpenEdit(v)}
-                          className="p-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg transition-all"
-                          title="Edit Kendaraan"
+                          className="p-1.5 bg-white hover:bg-amber-50 text-amber-600 border border-slate-200 hover:border-amber-300 rounded-lg transition-all cursor-pointer shadow-2xs"
                         >
                           <Edit className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => setVehicleToDelete(v)}
-                          className="p-1.5 bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 rounded-lg transition-all"
-                          title="Hapus Kendaraan"
+                          className="p-1.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-300 rounded-lg transition-all cursor-pointer shadow-2xs"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -242,20 +244,20 @@ export const MasterVehiclesView: React.FC = () => {
 
       {/* Modal Add / Edit */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/50">
-              <h3 className="text-sm font-bold text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+              <h3 className="text-sm font-bold text-slate-900">
                 {vehicleToEdit ? `Edit Kendaraan: ${vehicleToEdit.name}` : 'Tambah Jenis Kendaraan Baru'}
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-3.5 text-xs text-slate-200">
+            <form onSubmit={handleSubmit} className="p-5 space-y-3.5 text-xs text-slate-700">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">
                   Kode Kendaraan (Unique) *
                 </label>
                 <input
@@ -264,12 +266,12 @@ export const MasterVehiclesView: React.FC = () => {
                   placeholder="Contoh: TRUK-ENGKEL"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono uppercase focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">
                   Nama Jenis Kendaraan *
                 </label>
                 <input
@@ -278,19 +280,19 @@ export const MasterVehiclesView: React.FC = () => {
                   placeholder="Contoh: Truk Engkel Box (Canter)"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                  <label className="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">
                     Kategori Kendaraan
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                   >
                     <option value="Motor">Motor (Roda 2)</option>
                     <option value="Mobil Box">Mobil Box</option>
@@ -300,21 +302,21 @@ export const MasterVehiclesView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <Weight className="w-3 h-3 text-emerald-400" />
+                  <label className="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <Weight className="w-3.5 h-3.5 text-emerald-600" />
                     Kapasitas Beban (kg)
                   </label>
                   <input
                     type="number"
                     value={maxWeightCapacity}
                     onChange={(e) => setMaxWeightCapacity(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                <label className="block text-[11px] font-semibold text-slate-700 uppercase tracking-wider mb-1">
                   Keterangan / Deskripsi
                 </label>
                 <textarea
@@ -322,21 +324,21 @@ export const MasterVehiclesView: React.FC = () => {
                   placeholder="Keterangan peruntukan muatan kendaraan ini..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 resize-none"
                 />
               </div>
 
-              <div className="pt-2 border-t border-slate-800 flex justify-end gap-2">
+              <div className="pt-2 border-t border-slate-200 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-semibold"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold shadow-md"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-md shadow-blue-600/20 cursor-pointer"
                 >
                   Simpan Kendaraan
                 </button>
@@ -348,25 +350,25 @@ export const MasterVehiclesView: React.FC = () => {
 
       {/* Modal Confirm Delete */}
       {vehicleToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4 text-xs">
-            <div className="flex items-center gap-3 text-rose-400">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-slate-200 w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4 text-xs">
+            <div className="flex items-center gap-3 text-rose-600">
               <AlertCircle className="w-6 h-6 shrink-0" />
               <div>
-                <h4 className="font-bold text-white text-sm">Hapus Jenis Kendaraan?</h4>
-                <p className="text-slate-400">Kendaraan <strong>{vehicleToDelete.name}</strong> akan dihapus dari sistem.</p>
+                <h4 className="font-bold text-slate-900 text-sm">Hapus Jenis Kendaraan?</h4>
+                <p className="text-slate-500">Kendaraan <strong>{vehicleToDelete.name}</strong> akan dihapus dari sistem.</p>
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
               <button
                 onClick={() => setVehicleToDelete(null)}
-                className="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg font-semibold"
+                className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 cursor-pointer"
               >
                 Batal
               </button>
               <button
                 onClick={handleDelete}
-                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-semibold"
+                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold cursor-pointer"
               >
                 Hapus
               </button>

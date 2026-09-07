@@ -138,34 +138,34 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-800/50">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
               <Plus className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Input Order & Penugasan Driver</h3>
-              <p className="text-xs text-slate-400">Buat pesanan baru dan tugaskan langsung ke driver armada</p>
+              <h3 className="text-base font-bold text-slate-900">Input Order & Penugasan Driver</h3>
+              <p className="text-xs text-slate-500">Buat pesanan baru dan tugaskan langsung ke driver armada</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs text-slate-200">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs text-slate-700">
           
           {/* Customer / Pengirim */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
               Customer / Merchant Pengirim *
             </label>
             <input
@@ -174,15 +174,15 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
               placeholder="Contoh: PT Surya Logistik / Toko Makmur"
               value={customer}
               onChange={(e) => setCustomer(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
             />
           </div>
 
           {/* Lokasi Pickup & Dropoff */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-emerald-400" />
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-emerald-600" />
                 Lokasi Jemput (Pickup) *
               </label>
               <input
@@ -191,12 +191,12 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                 placeholder="Alamat penjemputan barang"
                 value={pickupLocation}
                 onChange={(e) => setPickupLocation(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-rose-400" />
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-rose-600" />
                 Lokasi Tujuan (Dropoff) *
               </label>
               <input
@@ -205,7 +205,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                 placeholder="Alamat penerima paket"
                 value={dropoffLocation}
                 onChange={(e) => setDropoffLocation(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
           </div>
@@ -213,9 +213,9 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
           {/* Cabang & Jenis Paket */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span>Cabang Operasional</span>
-                <span className="text-[9px] text-emerald-400 font-mono">Master Branch</span>
+                <span className="text-[9px] text-emerald-600 font-mono">Master Branch</span>
               </label>
               <select
                 value={branch}
@@ -225,7 +225,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                   const found = branchList.find((b) => b.name === bName);
                   if (found) setSelectedBranchId(found.id);
                 }}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
                 {branchList.length > 0
                   ? branchList.map((b) => (
@@ -239,9 +239,9 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span>Jenis Muatan / Paket</span>
-                <span className="text-[9px] text-orange-400 font-mono">Master Cargo</span>
+                <span className="text-[9px] text-orange-600 font-mono">Master Cargo</span>
               </label>
               <select
                 value={packageType}
@@ -251,7 +251,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                   const found = cargoList.find((c) => c.name === cName);
                   if (found) setSelectedCargoTypeId(found.id);
                 }}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
                 {cargoList.length > 0
                   ? cargoList.map((c) => (
@@ -275,7 +275,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
           {/* Prioritas & Driver Assignment */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
                 Tingkat Prioritas
               </label>
               <div className="flex gap-2">
@@ -287,11 +287,11 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                     className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
                       priority === p
                         ? p === 'Urgent' 
-                          ? 'bg-rose-500/30 text-rose-300 border-rose-500' 
+                          ? 'bg-rose-50 text-rose-700 border-rose-300' 
                           : p === 'Tinggi'
-                          ? 'bg-amber-500/30 text-amber-300 border-amber-500'
-                          : 'bg-blue-500/30 text-blue-300 border-blue-500'
-                        : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                          ? 'bg-amber-50 text-amber-700 border-amber-300'
+                          : 'bg-blue-50 text-blue-700 border-blue-300'
+                        : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-200'
                     }`}
                   >
                     {p}
@@ -301,16 +301,16 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span>Tugaskan Driver (Assignment)</span>
-                <span className="text-[10px] text-emerald-400">
+                <span className="text-[10px] text-emerald-600 font-semibold">
                   {availableDrivers.length} Siap
                 </span>
               </label>
               <select
                 value={assignedDriverId}
                 onChange={(e) => setAssignedDriverId(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
                 <option value="">-- Simpan sebagai Belum Ditugaskan --</option>
                 {availableDrivers.map((d) => (
@@ -324,7 +324,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
 
           {/* Catatan Tambahan */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
               Catatan / Instruksi Dispatcher
             </label>
             <textarea
@@ -332,22 +332,22 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
               placeholder="Instruksi khusus penanganan muatan atau kontak penerima..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white resize-none transition-colors"
             />
           </div>
 
           {/* Footer Action */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/30 transition-all active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95"
             >
               Simpan & Terbitkan Order
             </button>

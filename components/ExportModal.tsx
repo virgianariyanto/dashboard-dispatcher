@@ -160,23 +160,23 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         
         {/* Header Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-800/50">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
               <Download className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Export Laporan Dispatcher</h3>
-              <p className="text-xs text-slate-400">Ekspor rekap data driver atau order ke Excel / PDF</p>
+              <h3 className="text-base font-bold text-slate-900">Export Laporan Dispatcher</h3>
+              <p className="text-xs text-slate-500">Ekspor rekap data driver atau order ke Excel / PDF</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -187,7 +187,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
           {/* Tipe Laporan */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-2">
               Jenis Data yang Diekspor
             </label>
             <div className="grid grid-cols-2 gap-2.5">
@@ -196,14 +196,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setReportType('drivers')}
                 className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${
                   reportType === 'drivers'
-                    ? 'bg-blue-600/20 border-blue-500 text-blue-300 ring-1 ring-blue-500/30'
-                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                    ? 'bg-blue-50 border-blue-300 text-blue-800 ring-1 ring-blue-400/30'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <Users className="w-4 h-4 text-blue-400" />
+                <Users className="w-4 h-4 text-blue-600" />
                 <div className="text-left">
                   <div className="font-bold text-xs">Kinerja Driver</div>
-                  <div className="text-[10px] text-slate-400">Status & Performa</div>
+                  <div className="text-[10px] text-slate-500">Status & Performa</div>
                 </div>
               </button>
 
@@ -212,14 +212,14 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setReportType('orders')}
                 className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all ${
                   reportType === 'orders'
-                    ? 'bg-amber-600/20 border-amber-500 text-amber-300 ring-1 ring-amber-500/30'
-                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                    ? 'bg-amber-50 border-amber-300 text-amber-800 ring-1 ring-amber-400/30'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <ClipboardList className="w-4 h-4 text-amber-400" />
+                <ClipboardList className="w-4 h-4 text-amber-600" />
                 <div className="text-left">
                   <div className="font-bold text-xs">Data Order</div>
-                  <div className="text-[10px] text-slate-400">Muatan & Pengiriman</div>
+                  <div className="text-[10px] text-slate-500">Muatan & Pengiriman</div>
                 </div>
               </button>
             </div>
@@ -227,7 +227,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           
           {/* Format Selection */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-2">
               Pilih Format Dokumen
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -236,13 +236,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setFormat('excel')}
                 className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                   format === 'excel'
-                    ? 'bg-emerald-500/15 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500/30'
-                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800 ring-1 ring-emerald-400/30'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <FileSpreadsheet className="w-5 h-5 text-emerald-400" />
+                <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
                 <span className="font-bold text-xs">Excel (.CSV)</span>
-                <span className="text-[10px] text-slate-400 text-center">Kompatibel Excel & Spreadsheet</span>
+                <span className="text-[10px] text-slate-500 text-center">Kompatibel Excel & Spreadsheet</span>
               </button>
 
               <button
@@ -250,21 +250,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 onClick={() => setFormat('pdf')}
                 className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                   format === 'pdf'
-                    ? 'bg-blue-500/15 border-blue-500 text-blue-300 ring-1 ring-blue-500/30'
-                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                    ? 'bg-blue-50 border-blue-300 text-blue-800 ring-1 ring-blue-400/30'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <Printer className="w-5 h-5 text-blue-400" />
+                <Printer className="w-5 h-5 text-blue-600" />
                 <span className="font-bold text-xs">Cetak / PDF</span>
-                <span className="text-[10px] text-slate-400 text-center">Format siap cetak resmi</span>
+                <span className="text-[10px] text-slate-500 text-center">Format siap cetak resmi</span>
               </button>
             </div>
           </div>
 
           {/* Periode Rekap */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-blue-400" />
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-blue-600" />
               Periode Rekap Laporan
             </label>
             <div className="flex gap-2">
@@ -275,8 +275,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   onClick={() => setReportPeriod(p)}
                   className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold capitalize transition-all ${
                     reportPeriod === p
-                      ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
-                      : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-200'
                   }`}
                 >
                   {p}
@@ -286,22 +286,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
 
           {/* Summary Preview */}
-          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-800 space-y-1.5 text-slate-300">
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 text-slate-700">
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">Jumlah Data:</span>
-              <span className="font-mono font-bold text-white">
+              <span className="text-slate-500">Jumlah Data:</span>
+              <span className="font-mono font-bold text-slate-900">
                 {reportType === 'drivers' ? `${drivers.length} Driver` : `${orders.length} Order`}
               </span>
             </div>
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">Cabang Terpilih:</span>
-              <span className="font-medium text-blue-400">{selectedBranch}</span>
+              <span className="text-slate-500">Cabang Terpilih:</span>
+              <span className="font-medium text-blue-600 font-semibold">{selectedBranch}</span>
             </div>
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-400">
+              <span className="text-slate-500">
                 {reportType === 'drivers' ? 'Total Tugas Selesai:' : 'Status Order Selesai:'}
               </span>
-              <span className="font-mono font-bold text-emerald-400">
+              <span className="font-mono font-bold text-emerald-600">
                 {reportType === 'drivers'
                   ? `${kpi.ordersCompleted} Tugas`
                   : `${orders.filter((o) => o.status === 'Selesai').length} Selesai`}
@@ -310,18 +310,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </div>
 
           {downloadSuccess && (
-            <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-center text-xs font-semibold flex items-center justify-center gap-1.5 animate-fade-in">
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-center text-xs font-semibold flex items-center justify-center gap-1.5 animate-fade-in">
+              <CheckCircle className="w-4 h-4 text-emerald-600" />
               <span>File laporan berhasil diekspor!</span>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="pt-2 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
             >
               Batal
             </button>
@@ -329,7 +329,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <button
                 type="button"
                 onClick={handleExportCSV}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-600/30 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-600/20 transition-all active:scale-95"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh File Excel (.CSV)</span>
@@ -338,7 +338,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               <button
                 type="button"
                 onClick={handlePrintPDF}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/30 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95"
               >
                 <Printer className="w-4 h-4" />
                 <span>Buka Print / Simpan PDF</span>

@@ -124,20 +124,20 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-800/50">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">
               {isEditMode ? <UserCheck className="w-5 h-5" /> : <UserPlus className="w-5 h-5" />}
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">
+              <h3 className="text-base font-bold text-slate-900">
                 {isEditMode ? `Edit Data: ${driverToEdit.name}` : 'Tambah Driver Baru'}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 {isEditMode
                   ? 'Perbarui data identitas, armada, dan penempatan driver'
                   : 'Daftarkan personil driver baru yang terhubung ke data master'}
@@ -146,19 +146,19 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs text-slate-200">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs text-slate-700">
           
           {/* Nama & Telepon */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
                 Nama Lengkap Driver *
               </label>
               <input
@@ -167,13 +167,13 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
                 placeholder="Contoh: Budi Santoso"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                <Phone className="w-3 h-3 text-slate-400" />
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Phone className="w-3 h-3 text-slate-500" />
                 Nomor Telepon / WhatsApp
               </label>
               <input
@@ -181,7 +181,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
                 placeholder="0812-xxxx-xxxx"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
           </div>
@@ -189,17 +189,17 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
           {/* Jenis Kendaraan & Nomor Plat */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1">
-                  <Truck className="w-3 h-3 text-slate-400" />
+                  <Truck className="w-3 h-3 text-slate-500" />
                   Jenis Kendaraan
                 </span>
-                <span className="text-[10px] text-emerald-400 font-mono">Master Kendaraan</span>
+                <span className="text-[10px] text-emerald-600 font-mono">Master Kendaraan</span>
               </label>
               <select
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
                 {masterVehicles.length > 0 ? (
                   masterVehicles.map((v) => (
@@ -217,7 +217,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
                 Nomor Plat Polisi *
               </label>
               <input
@@ -226,7 +226,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
                 placeholder="Contoh: B 1234 KLA"
                 value={plateNumber}
                 onChange={(e) => setPlateNumber(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 uppercase font-mono focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 uppercase font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
           </div>
@@ -234,17 +234,17 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
           {/* Cabang & Status Awal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-slate-400" />
+                  <MapPin className="w-3 h-3 text-slate-500" />
                   Cabang Operasi
                 </span>
-                <span className="text-[10px] text-purple-400 font-mono">Master Cabang</span>
+                <span className="text-[10px] text-purple-600 font-mono">Master Cabang</span>
               </label>
               <select
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
                 {masterBranches.length > 0 ? (
                   masterBranches.map((b) => (
@@ -259,14 +259,14 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span>Status Ketersediaan</span>
-                <span className="text-[10px] text-amber-400 font-mono">Master Status</span>
+                <span className="text-[10px] text-amber-600 font-mono">Master Status</span>
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as DriverStatus)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
                 {masterStatuses.length > 0 ? (
                   masterStatuses.map((s) => (
@@ -288,35 +288,35 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
           {/* Jam Kerja Mulai - Selesai */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-emerald-400" />
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-emerald-600" />
                 Jam Mulai Dinas
               </label>
               <input
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-rose-400" />
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-rose-600" />
                 Jam Selesai Dinas
               </label>
               <input
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
           </div>
 
           {/* Catatan / Keterangan */}
           <div>
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-              <FileText className="w-3 h-3 text-slate-400" />
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+              <FileText className="w-3 h-3 text-slate-500" />
               Catatan / Wilayah Tugas Khusus
             </label>
             <textarea
@@ -324,22 +324,22 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
               placeholder="Contoh: Standby di Hub Dago, siap antar paket rute luar kota..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white resize-none transition-colors"
             />
           </div>
 
           {/* Footer Action */}
-          <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2.5">
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/30 transition-all active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95"
             >
               {isEditMode ? 'Simpan Perubahan' : 'Daftarkan Driver'}
             </button>

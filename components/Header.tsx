@@ -64,24 +64,24 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-slate-900/90 backdrop-blur-md text-white border-b border-slate-800/80 sticky top-0 z-30 shadow-sm">
+    <header className="bg-white/95 backdrop-blur-md text-slate-800 border-b border-slate-200 sticky top-0 z-30 shadow-xs">
       <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           
-          {/* Left: Clean Breadcrumb & Page Title (Tanpa logo/badge ganda) */}
+          {/* Left: Clean Breadcrumb & Page Title */}
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 text-xs text-slate-400 mb-0.5">
-              <span className="font-semibold text-blue-400 uppercase tracking-wider text-[10px]">
+              <span className="font-semibold text-blue-600 uppercase tracking-wider text-[10px]">
                 {category}
               </span>
-              <span className="text-slate-600">/</span>
-              <span className="text-slate-300 font-medium">{title}</span>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-600 font-medium">{title}</span>
             </div>
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-white truncate">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-xs text-slate-400 truncate mt-0.5 max-w-xl">
+              <p className="text-xs text-slate-500 truncate mt-0.5 max-w-xl">
                 {subtitle}
               </p>
             )}
@@ -91,16 +91,16 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             
             {/* Cabang Filter */}
-            <div className="flex items-center bg-slate-800/90 rounded-lg border border-slate-700/80 px-2.5 py-1.5 text-xs text-slate-200 shadow-sm">
+            <div className="flex items-center bg-slate-50 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 shadow-2xs">
               <MapPin className="w-3.5 h-3.5 text-slate-400 mr-1.5 shrink-0" />
               <select
                 value={selectedBranch}
                 onChange={(e) => onSelectBranch(e.target.value)}
-                className="bg-transparent text-slate-200 focus:outline-none cursor-pointer pr-1 font-medium text-xs"
+                className="bg-transparent text-slate-700 focus:outline-none cursor-pointer pr-1 font-medium text-xs"
                 aria-label="Pilih Cabang"
               >
                 {BRANCH_LIST.map((b) => (
-                  <option key={b} value={b} className="bg-slate-800 text-slate-200">
+                  <option key={b} value={b} className="bg-white text-slate-700">
                     {b}
                   </option>
                 ))}
@@ -109,15 +109,15 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* TimeFrame (Harian, Mingguan, Bulanan) */}
             {showTimeFrame && (
-              <div className="inline-flex bg-slate-800/90 p-0.5 rounded-lg border border-slate-700/80 text-xs">
+              <div className="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
                 {(['harian', 'mingguan', 'bulanan'] as TimeFrame[]).map((tf) => (
                   <button
                     key={tf}
                     onClick={() => onChangeTimeFrame(tf)}
-                    className={`px-2 py-1 rounded-md font-medium capitalize text-[11px] transition-all ${
+                    className={`px-2.5 py-1 rounded-md font-medium capitalize text-[11px] transition-all cursor-pointer ${
                       timeFrame === tf
-                        ? 'bg-blue-600 text-white shadow-sm font-semibold'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-white text-blue-600 shadow-xs font-semibold'
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
                     {tf}
@@ -132,9 +132,9 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onRefresh}
                 disabled={isSyncing}
                 title="Sinkronkan data dengan PostgreSQL"
-                className="p-2 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition-all text-xs"
+                className="p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-xs shadow-2xs cursor-pointer disabled:opacity-50"
               >
-                <RefreshCw className={`w-3.5 h-3.5 text-blue-400 ${isSyncing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />
               </button>
             )}
 
@@ -142,17 +142,17 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenUnassignedList}
               title={`${unassignedCount} order belum memiliki driver`}
-              className={`relative p-2 rounded-lg border transition-all text-xs ${
+              className={`relative p-2 rounded-lg border transition-all text-xs cursor-pointer shadow-2xs ${
                 isAlertCondition
-                  ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse'
+                  ? 'bg-rose-50 border-rose-300 text-rose-700 animate-pulse'
                   : unassignedCount > 0
-                  ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
-                  : 'bg-slate-800/90 border-slate-700/80 text-slate-400 hover:text-slate-200'
+                  ? 'bg-amber-50 border-amber-300 text-amber-700'
+                  : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900'
               }`}
             >
               <Bell className="w-3.5 h-3.5" />
               {unassignedCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-slate-900">
+                <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-white">
                   {unassignedCount}
                 </span>
               )}
@@ -161,31 +161,31 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Export Laporan */}
             <button
               onClick={onOpenExport}
-              className="inline-flex items-center gap-1.5 bg-slate-800/90 hover:bg-slate-700 text-slate-200 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700/80 text-xs font-medium transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium transition-all shadow-2xs cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-blue-400" />
+              <Download className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden sm:inline">Export</span>
             </button>
 
             {/* Input Order Baru */}
             <button
               onClick={onOpenNewOrder}
-              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-blue-600/30 transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-blue-600/25 transition-all active:scale-95 cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               <span>+ Order Baru</span>
             </button>
 
             {/* Separator & Admin Profile + Logout */}
-            <div className="flex items-center pl-1 sm:pl-2 border-l border-slate-800 gap-2">
-              <div className="hidden lg:flex items-center gap-2 bg-slate-800/70 border border-slate-700/80 rounded-lg px-2.5 py-1">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-[10px] shadow-sm ring-1 ring-white/20 shrink-0">
+            <div className="flex items-center pl-1 sm:pl-2 border-l border-slate-200 gap-2">
+              <div className="hidden lg:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-[10px] shadow-xs ring-1 ring-blue-100 shrink-0">
                   A
                 </div>
                 <div className="text-left leading-tight">
-                  <div className="text-[11px] font-bold text-slate-200">Admin</div>
-                  <div className="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <div className="text-[11px] font-bold text-slate-800">Admin</div>
+                  <div className="text-[9px] text-emerald-600 font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     Super Admin
                   </div>
                 </div>
@@ -195,9 +195,9 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={handleLogout}
                 disabled={isLoggingOut}
                 title="Keluar dari sistem (Logout)"
-                className="inline-flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border border-rose-500/30 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-2xs active:scale-95 cursor-pointer disabled:opacity-50"
               >
-                <LogOut className={`w-3.5 h-3.5 text-rose-400 ${isLoggingOut ? 'animate-spin' : ''}`} />
+                <LogOut className={`w-3.5 h-3.5 text-rose-500 ${isLoggingOut ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">Keluar</span>
               </button>
             </div>

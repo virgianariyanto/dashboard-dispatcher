@@ -9,8 +9,8 @@ import {
   Building2, 
   Database, 
   ChevronRight,
-  ShieldCheck,
-  Package,
+  ShieldCheck, 
+  Package, 
   ClipboardList,
   LogOut
 } from 'lucide-react';
@@ -18,7 +18,7 @@ import {
 export type NavigationTab = 
   | 'dashboard' 
   | 'drivers' 
-  | 'orders'
+  | 'orders' 
   | 'master-status' 
   | 'master-vehicles' 
   | 'master-branches'
@@ -37,24 +37,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   driverCount,
   orderCount = 0,
-  unassignedCount,
 }) => {
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40">
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40 shadow-xs">
       
       {/* Brand & Logo Header */}
-      <div className="p-4 border-b border-slate-800 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/20 shrink-0">
+      <div className="p-4 border-b border-slate-200 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 ring-4 ring-blue-50 shrink-0">
           <Truck className="w-5 h-5 text-white" />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <h1 className="text-sm font-black tracking-tight text-white truncate">
+            <h1 className="text-sm font-black tracking-tight text-slate-900 truncate">
               DISPATCHER OPS
             </h1>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <p className="text-[11px] text-slate-400 truncate">
+          <p className="text-[11px] text-slate-500 truncate">
             Fleet Monitoring System
           </p>
         </div>
@@ -72,14 +71,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Dashboard */}
             <button
               onClick={() => onSelectTab('dashboard')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'dashboard'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <LayoutDashboard className="w-4 h-4 text-slate-300" />
+                <LayoutDashboard className={`w-4 h-4 ${activeTab === 'dashboard' ? 'text-white' : 'text-slate-500'}`} />
                 <span>Dashboard Overview</span>
               </div>
               {activeTab === 'dashboard' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
@@ -88,17 +87,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Monitoring Driver & Tugas */}
             <button
               onClick={() => onSelectTab('drivers')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'drivers'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Truck className="w-4 h-4 text-slate-300" />
+                <Truck className={`w-4 h-4 ${activeTab === 'drivers' ? 'text-white' : 'text-slate-500'}`} />
                 <span>Monitoring Driver</span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800/80 text-emerald-400 border border-emerald-500/20">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeTab === 'drivers' 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              }`}>
                 {driverCount}
               </span>
             </button>
@@ -106,17 +109,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Monitoring Order */}
             <button
               onClick={() => onSelectTab('orders')}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'orders'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <ClipboardList className="w-4 h-4 text-blue-400" />
+                <ClipboardList className={`w-4 h-4 ${activeTab === 'orders' ? 'text-white' : 'text-slate-500'}`} />
                 <span>Monitoring Order</span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800/80 text-blue-400 border border-blue-500/20">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeTab === 'orders' 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-blue-50 text-blue-700 border border-blue-200'
+              }`}>
                 {orderCount}
               </span>
             </button>
@@ -127,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div>
           <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
             <span>Master Data</span>
-            <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1 rounded border border-emerald-500/20">
+            <span className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
               PostgreSQL
             </span>
           </div>
@@ -135,14 +142,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Master Status Driver */}
             <button
               onClick={() => onSelectTab('master-status')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'master-status'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Tag className="w-4 h-4 text-amber-400" />
+                <Tag className={`w-4 h-4 ${activeTab === 'master-status' ? 'text-white' : 'text-amber-500'}`} />
                 <span>Master Status</span>
               </div>
               {activeTab === 'master-status' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
@@ -151,14 +158,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Master Jenis Kendaraan */}
             <button
               onClick={() => onSelectTab('master-vehicles')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'master-vehicles'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Car className="w-4 h-4 text-emerald-400" />
+                <Car className={`w-4 h-4 ${activeTab === 'master-vehicles' ? 'text-white' : 'text-emerald-500'}`} />
                 <span>Master Kendaraan</span>
               </div>
               {activeTab === 'master-vehicles' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
@@ -167,14 +174,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Master Cabang */}
             <button
               onClick={() => onSelectTab('master-branches')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'master-branches'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Building2 className="w-4 h-4 text-purple-400" />
+                <Building2 className={`w-4 h-4 ${activeTab === 'master-branches' ? 'text-white' : 'text-purple-500'}`} />
                 <span>Master Cabang</span>
               </div>
               {activeTab === 'master-branches' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
@@ -183,14 +190,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Master Jenis Muatan */}
             <button
               onClick={() => onSelectTab('master-cargo-types')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
                 activeTab === 'master-cargo-types'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Package className="w-4 h-4 text-orange-400" />
+                <Package className={`w-4 h-4 ${activeTab === 'master-cargo-types' ? 'text-white' : 'text-orange-500'}`} />
                 <span>Master Muatan</span>
               </div>
               {activeTab === 'master-cargo-types' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
@@ -201,17 +208,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Admin User & Database Connection Footer */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950/40 space-y-2">
+      <div className="p-3 border-t border-slate-200 bg-slate-50/70 space-y-2">
         {/* Admin Profile Bar */}
-        <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/70 flex items-center justify-between gap-2">
+        <div className="p-2 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 shadow-xs">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs ring-1 ring-white/20 shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-xs ring-2 ring-blue-100 shrink-0">
               A
             </div>
             <div className="min-w-0">
-              <div className="text-[11px] font-bold text-white truncate">Administrator</div>
-              <div className="text-[10px] text-blue-400 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <div className="text-[11px] font-bold text-slate-800 truncate">Administrator</div>
+              <div className="text-[10px] text-blue-600 font-medium flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-600" />
                 <span className="truncate">Admin Mode</span>
               </div>
             </div>
@@ -229,23 +236,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }
             }}
             title="Keluar (Logout)"
-            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border border-rose-500/30 transition-all cursor-pointer shrink-0"
+            className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer shrink-0"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Database Connection Status */}
-        <div className="p-2 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
+        <div className="p-2 rounded-xl bg-white/90 border border-slate-200 flex items-center gap-2.5 shadow-xs">
+          <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 border border-emerald-100">
             <Database className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] font-bold text-white flex items-center gap-1.5">
+            <div className="text-[10px] font-bold text-slate-800 flex items-center gap-1.5">
               <span>PostgreSQL 18</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
-            <p className="text-[9px] text-slate-400 truncate font-mono">
+            <p className="text-[9px] text-slate-500 truncate font-mono">
               dashboard_dispatcher
             </p>
           </div>

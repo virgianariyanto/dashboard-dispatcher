@@ -561,7 +561,7 @@ export default function DispatcherDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#090d16] text-slate-100">
+    <div className="min-h-screen flex bg-slate-50 text-slate-800">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -707,14 +707,23 @@ export default function DispatcherDashboardPage() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-800/80 bg-slate-950/60 py-4 text-center text-xs text-slate-500 no-print">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Truck className="w-4 h-4 text-blue-500" />
-              <span className="font-semibold text-slate-400">Dashboard Monitoring Driver & Dispatcher Engine</span>
+        <footer className="border-t border-slate-200 bg-white py-4 px-4 sm:px-6 lg:px-8 text-xs no-print shadow-xs transition-colors">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-600">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 shrink-0">
+                <Truck className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-slate-800 tracking-tight text-xs sm:text-sm">
+                Dashboard Monitoring Driver &amp; Dispatcher Engine
+              </span>
             </div>
-            <div className="text-slate-400">
-              Terhubung ke PostgreSQL Database • Master Data Relasional Aktif
+            <div className="flex items-center gap-2 text-[11px] text-slate-500">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                PostgreSQL 18 Connected
+              </span>
+              <span>•</span>
+              <span>Master Data Relasional Aktif</span>
             </div>
           </div>
         </footer>
