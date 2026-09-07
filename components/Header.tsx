@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   PlusCircle, 
   Download, 
   Bell, 
   MapPin, 
-  RefreshCw 
+  RefreshCw,
+  LogOut
 } from 'lucide-react';
 import { TimeFrame } from '@/types/dispatcher';
 import { BRANCH_LIST } from '@/data/initialData';
@@ -47,6 +48,20 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenUnassignedList,
 }) => {
   const isAlertCondition = unassignedCount > 0 && unassignedCount >= readyDriverCount;
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (window.confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
+      setIsLoggingOut(true);
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (err) {
+        console.error('Logout error:', err);
+      } finally {
+        window.location.href = '/login';
+      }
+    }
+  };
 
   return (
     <header className="bg-slate-900/90 backdrop-blur-md text-white border-b border-slate-800/80 sticky top-0 z-30 shadow-sm">
@@ -160,6 +175,32 @@ export const Header: React.FC<HeaderProps> = ({
               <PlusCircle className="w-3.5 h-3.5" />
               <span>+ Order Baru</span>
             </button>
+
+            {/* Separator & Admin Profile + Logout */}
+            <div className="flex items-center pl-1 sm:pl-2 border-l border-slate-800 gap-2">
+              <div className="hidden lg:flex items-center gap-2 bg-slate-800/70 border border-slate-700/80 rounded-lg px-2.5 py-1">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-[10px] shadow-sm ring-1 ring-white/20 shrink-0">
+                  A
+                </div>
+                <div className="text-left leading-tight">
+                  <div className="text-[11px] font-bold text-slate-200">Admin</div>
+                  <div className="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Super Admin
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                title="Keluar dari sistem (Logout)"
+                className="inline-flex items-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border border-rose-500/30 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+              >
+                <LogOut className={`w-3.5 h-3.5 text-rose-400 ${isLoggingOut ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Keluar</span>
+              </button>
+            </div>
 
           </div>
 

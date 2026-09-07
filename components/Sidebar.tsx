@@ -11,7 +11,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Package,
-  ClipboardList
+  ClipboardList,
+  LogOut
 } from 'lucide-react';
 
 export type NavigationTab = 
@@ -199,18 +200,52 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       </div>
 
-      {/* Database Connection Footer */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950/40">
-        <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-2.5">
+      {/* Admin User & Database Connection Footer */}
+      <div className="p-3 border-t border-slate-800 bg-slate-950/40 space-y-2">
+        {/* Admin Profile Bar */}
+        <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/70 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs ring-1 ring-white/20 shrink-0">
+              A
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] font-bold text-white truncate">Administrator</div>
+              <div className="text-[10px] text-blue-400 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span className="truncate">Admin Mode</span>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              if (window.confirm('Apakah Anda yakin ingin keluar dari sistem?')) {
+                try {
+                  await fetch('/api/auth/logout', { method: 'POST' });
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  window.location.href = '/login';
+                }
+              }
+            }}
+            title="Keluar (Logout)"
+            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-rose-200 border border-rose-500/30 transition-all cursor-pointer shrink-0"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Database Connection Status */}
+        <div className="p-2 rounded-xl bg-slate-800/40 border border-slate-700/40 flex items-center gap-2.5">
           <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0">
-            <Database className="w-4 h-4" />
+            <Database className="w-3.5 h-3.5" />
           </div>
           <div className="min-w-0">
-            <div className="text-[11px] font-bold text-white flex items-center gap-1.5">
+            <div className="text-[10px] font-bold text-white flex items-center gap-1.5">
               <span>PostgreSQL 18</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            <p className="text-[10px] text-slate-400 truncate font-mono">
+            <p className="text-[9px] text-slate-400 truncate font-mono">
               dashboard_dispatcher
             </p>
           </div>

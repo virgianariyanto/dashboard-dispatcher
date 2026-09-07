@@ -133,3 +133,16 @@ model TaskHistory {
 
   driver          Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
 }
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String?  @unique
+  password  String
+  name      String   @default("Administrator")
+  role      String   @default("admin")
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

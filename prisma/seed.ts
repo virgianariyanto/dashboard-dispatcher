@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
 
 const MASTER_BRANCHES = [
   { code: 'JKT-PST', name: 'Jakarta Pusat', city: 'Jakarta', address: 'Jl. Sudirman No. 10', phone: '021-555101' },
@@ -517,7 +519,23 @@ async function main() {
     });
   }
 
-  console.log('✔ Master Data, Drivers & Orders successfully seeded with foreign key relations!');
+  // Seed default admin
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+  await prisma.user.upsert({
+    where: { username: 'admin' },
+    update: {},
+    create: {
+      username: 'admin',
+      email: 'admin@dispatcher.com',
+      password: hashedPassword,
+      name: 'Super Administrator',
+      role: 'admin',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    },
+  });
+
+  console.log('✔ Master Data, Drivers, Orders & Default Admin successfully seeded!');
 }
 
 main()
