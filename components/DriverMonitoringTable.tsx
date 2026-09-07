@@ -11,7 +11,8 @@ import {
   ChevronDown,
   UserPlus,
   Edit,
-  Trash2
+  Trash2,
+  User
 } from 'lucide-react';
 import { Driver, DriverStatus } from '@/types/dispatcher';
 
@@ -27,6 +28,7 @@ interface DriverMonitoringTableProps {
   onOpenAddDriver: () => void;
   onEditDriver: (driver: Driver) => void;
   onDeleteDriver: (driver: Driver) => void;
+  isLoading?: boolean;
 }
 
 export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
@@ -41,6 +43,7 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
   onOpenAddDriver,
   onEditDriver,
   onDeleteDriver,
+  isLoading = false,
 }) => {
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
 
@@ -183,7 +186,48 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-            {drivers.length === 0 ? (
+            {isLoading ? (
+              [...Array(6)].map((_, idx) => (
+                <tr key={idx} className="animate-pulse">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-slate-200 shrink-0" />
+                      <div className="space-y-1.5">
+                        <div className="h-3.5 w-28 bg-slate-200 rounded" />
+                        <div className="h-2.5 w-16 bg-slate-100 rounded" />
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-6 w-20 bg-slate-200 rounded-full" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-24 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-20 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-12 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-16 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-12 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-16 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-4 w-28 bg-slate-200 rounded" />
+                  </td>
+                  <td className="py-3 px-4 text-center">
+                    <div className="h-7 w-20 bg-slate-200 rounded-lg mx-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : drivers.length === 0 ? (
               <tr>
                 <td colSpan={10} className="py-8 text-center text-slate-500 text-sm">
                   Tidak ada data driver yang sesuai dengan kriteria filter.
@@ -204,11 +248,9 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <img
-                            src={driver.avatarUrl}
-                            alt={driver.name}
-                            className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100"
-                          />
+                          <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 text-slate-600 flex items-center justify-center shadow-xs shrink-0">
+                            <User className="w-4 h-4 text-slate-600" />
+                          </div>
                           <span 
                             className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white ${
                               driver.status === 'Ready' ? 'bg-emerald-500' :

@@ -26,6 +26,7 @@ interface OrderMonitoringTableProps {
   onCompleteOrder: (orderId: string) => void;
   onCancelOrder: (orderId: string) => void;
   onDeleteOrder?: (orderId: string) => void;
+  isLoading?: boolean;
 }
 
 export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
@@ -35,6 +36,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
   onCompleteOrder,
   onCancelOrder,
   onDeleteOrder,
+  isLoading = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('Semua');
@@ -251,7 +253,39 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
             </thead>
 
             <tbody className="divide-y divide-slate-100">
-              {filteredOrders.length === 0 ? (
+              {isLoading ? (
+                [...Array(6)].map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="px-4 py-3.5">
+                      <div className="space-y-1.5">
+                        <div className="h-3.5 w-24 bg-slate-200 rounded font-mono" />
+                        <div className="h-4 w-14 bg-slate-100 rounded-full" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-6 w-20 bg-slate-200 rounded-full" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-4 w-32 bg-slate-200 rounded" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="space-y-1.5">
+                        <div className="h-3 w-40 bg-slate-200 rounded" />
+                        <div className="h-3 w-36 bg-slate-100 rounded" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-6 w-24 bg-slate-200 rounded-full" />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="h-4 w-28 bg-slate-200 rounded" />
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <div className="h-7 w-20 bg-slate-200 rounded-lg mx-auto" />
+                    </td>
+                  </tr>
+                ))
+              ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
                     Tidak ada order yang sesuai filter atau pencarian.

@@ -6,7 +6,8 @@ import {
   PieChart, 
   Trophy, 
   Star, 
-  Target, 
+  Target,
+  User,
 } from 'lucide-react';
 import { Driver, KPIData } from '@/types/dispatcher';
 
@@ -257,12 +258,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
                     <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[11px] shrink-0 font-mono shadow-2xs ${rankBadge}`}>
                       {index + 1}
                     </span>
-                    <div className="w-7 h-7 rounded-full bg-slate-200 overflow-hidden ring-2 ring-slate-100 shrink-0">
-                      <img 
-                        src={driver.avatarUrl} 
-                        alt={driver.name} 
-                        className="w-full h-full object-cover" 
-                      />
+                    <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
+                      <User className="w-3.5 h-3.5 text-slate-600" />
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">

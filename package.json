@@ -8,8 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:push": "node --env-file=.env.local node_modules/prisma/build/index.js db push",
+    "db:seed": "node --import tsx --env-file=.env.local prisma/seed.ts",
+    "db:push:local": "node --env-file=.env.local node_modules/prisma/build/index.js db push",
+    "db:seed:local": "node --import tsx --env-file=.env.local prisma/seed.ts",
+    "db:push:prod": "node --env-file=.env node_modules/prisma/build/index.js db push",
+    "db:seed:prod": "node --import tsx --env-file=.env prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",

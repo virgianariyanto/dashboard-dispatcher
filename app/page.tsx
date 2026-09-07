@@ -9,7 +9,7 @@ import {
   TimeFrame, 
   TaskHistoryItem 
 } from '@/types/dispatcher';
-import { INITIAL_DRIVERS, INITIAL_ORDERS } from '@/data/initialData';
+import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { Header } from '@/components/Header';
 import { AlertBanner } from '@/components/AlertBanner';
 import { KPICards } from '@/components/KPICards';
@@ -30,8 +30,8 @@ import { Truck, CheckCircle2, Database, RefreshCw } from 'lucide-react';
 
 export default function DispatcherDashboardPage() {
   // Main State (loaded from PostgreSQL)
-  const [drivers, setDrivers] = useState<Driver[]>(INITIAL_DRIVERS);
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   
@@ -591,34 +591,38 @@ export default function DispatcherDashboardPage() {
 
           {/* TAB 1: Dashboard Overview (Tabel monitoring driver telah dipisahkan ke tab tersendiri) */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6">
-              {/* Peringatan & Notifikasi Dispatcher (Poin 6.7 & 6.8) */}
-              <AlertBanner
-                unassignedCount={unassignedOrders.length}
-                readyDriverCount={readyDriversList.length}
-                onOpenNewOrder={() => {
-                  setPreSelectedDriverForOrder(null);
-                  setIsNewOrderOpen(true);
-                }}
-                onScrollToTable={() => setActiveTab('drivers')}
-              />
+            isLoading ? (
+              <DashboardSkeleton />
+            ) : (
+              <div className="space-y-6">
+                {/* Peringatan & Notifikasi Dispatcher (Poin 6.7 & 6.8) */}
+                <AlertBanner
+                  unassignedCount={unassignedOrders.length}
+                  readyDriverCount={readyDriversList.length}
+                  onOpenNewOrder={() => {
+                    setPreSelectedDriverForOrder(null);
+                    setIsNewOrderOpen(true);
+                  }}
+                  onScrollToTable={() => setActiveTab('drivers')}
+                />
 
-              {/* Bagian Atas: Indikator KPI Utama (Poin 3 & Poin 7) */}
-              <KPICards 
-                kpi={kpiData} 
-                onFilterStatus={(status) => {
-                  setSelectedStatus(status);
-                  setActiveTab('drivers');
-                }} 
-              />
+                {/* Bagian Atas: Indikator KPI Utama (Poin 3 & Poin 7) */}
+                <KPICards 
+                  kpi={kpiData} 
+                  onFilterStatus={(status) => {
+                    setSelectedStatus(status);
+                    setActiveTab('drivers');
+                  }} 
+                />
 
-              {/* Bagian Tengah: Visualisasi Grafik & Leaderboard (Poin 2.5, 7, 6.9, 6.10) */}
-              <ChartsSection
-                drivers={drivers}
-                kpi={kpiData}
-                onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
-              />
-            </div>
+                {/* Bagian Tengah: Visualisasi Grafik & Leaderboard (Poin 2.5, 7, 6.9, 6.10) */}
+                <ChartsSection
+                  drivers={drivers}
+                  kpi={kpiData}
+                  onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
+                />
+              </div>
+            )
           )}
 
           {/* TAB 2: Monitoring Driver & Tugas (Menu baru terpisah dari dashboard) */}
@@ -626,6 +630,7 @@ export default function DispatcherDashboardPage() {
             <div ref={tableRef}>
               <DriverMonitoringTable
                 drivers={displayDrivers}
+                isLoading={isLoading}
                 selectedStatus={selectedStatus}
                 onSelectStatus={setSelectedStatus}
                 searchQuery={searchQuery}
@@ -653,6 +658,7 @@ export default function DispatcherDashboardPage() {
             <OrderMonitoringTable
               orders={orders}
               drivers={drivers}
+              isLoading={isLoading}
               onOpenNewOrder={() => {
                 setPreSelectedDriverForOrder(null);
                 setIsNewOrderOpen(true);

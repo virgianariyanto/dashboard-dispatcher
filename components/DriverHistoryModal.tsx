@@ -11,7 +11,8 @@ import {
   Hourglass, 
   XCircle, 
   Star, 
-  Phone
+  Phone,
+  User
 } from 'lucide-react';
 import { Driver, TaskHistoryItem } from '@/types/dispatcher';
 
@@ -92,11 +93,9 @@ export const DriverHistoryModal: React.FC<DriverHistoryModalProps> = ({
         {/* Driver Summary Bar */}
         <div className="p-4 bg-slate-50/60 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="flex items-center gap-2.5">
-            <img 
-              src={driver.avatarUrl} 
-              alt={driver.name} 
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-200" 
-            />
+            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
+              <User className="w-5 h-5 text-slate-600" />
+            </div>
             <div>
               <div className="font-bold text-slate-900">{driver.name}</div>
               <div className="text-[11px] text-slate-500 flex items-center gap-1">
