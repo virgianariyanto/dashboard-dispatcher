@@ -6,15 +6,13 @@ export async function GET() {
   try {
     const orders = await prisma.order.findMany({
       include: {
-        cargoTypeObj: true,
-        branchObj: true,
+        taskTypeObj: true,
         driver: {
           select: {
             id: true,
             name: true,
-            plateNumber: true,
             phone: true,
-            vehicleType: true,
+            simType: true,
           },
         },
       },
@@ -25,8 +23,7 @@ export async function GET() {
 
     const formatted = orders.map((o) => ({
       ...o,
-      packageType: o.cargoTypeObj?.name || o.packageType,
-      branch: o.branchObj?.name || o.branch,
+      taskType: o.taskTypeObj?.name || o.taskType,
       createdAt: new Date(o.createdAt).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
@@ -52,38 +49,27 @@ export async function POST(request: Request) {
       customer,
       pickupLocation,
       dropoffLocation,
-      branch,
       status,
       assignedDriverId,
       assignedDriverName,
       targetDeliveryTime,
+      taskType: rawTaskType,
       packageType,
       priority,
       notes,
-      branchId,
+      taskTypeId: rawTaskTypeId,
       cargoTypeId,
     } = body;
 
-    // Resolve branchId if not provided
-    let resolvedBranchId = branchId;
-    if (!resolvedBranchId && branch) {
-      const b = await prisma.branch.findFirst({
+    const taskType = rawTaskType || packageType || 'Replace';
+    let resolvedTaskTypeId = rawTaskTypeId || cargoTypeId;
+    if (!resolvedTaskTypeId && taskType) {
+      const t = await prisma.taskType.findFirst({
         where: {
-          OR: [{ name: branch }, { code: branch }],
+          OR: [{ name: taskType }, { code: taskType }],
         },
       });
-      if (b) resolvedBranchId = b.id;
-    }
-
-    // Resolve cargoTypeId if not provided
-    let resolvedCargoTypeId = cargoTypeId;
-    if (!resolvedCargoTypeId && packageType) {
-      const c = await prisma.cargoType.findFirst({
-        where: {
-          OR: [{ name: packageType }, { code: packageType }],
-        },
-      });
-      if (c) resolvedCargoTypeId = c.id;
+      if (t) resolvedTaskTypeId = t.id;
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -95,16 +81,14 @@ export async function POST(request: Request) {
           customer,
           pickupLocation,
           dropoffLocation,
-          branch,
           status: status || (assignedDriverId ? 'Diterima' : 'Belum Ditugaskan'),
           assignedDriverId: assignedDriverId || null,
           assignedDriverName: assignedDriverName || null,
           targetDeliveryTime: targetDeliveryTime || 'Dalam 2 Jam',
-          packageType: packageType || 'Paket Reguler',
+          taskType,
           priority: priority || 'Normal',
           notes: notes || null,
-          branchId: resolvedBranchId || null,
-          cargoTypeId: resolvedCargoTypeId || null,
+          taskTypeId: resolvedTaskTypeId || null,
         },
       });
 

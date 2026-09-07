@@ -18,9 +18,8 @@ import { DriverMonitoringTable } from '@/components/DriverMonitoringTable';
 import { OrderMonitoringTable } from '@/components/OrderMonitoringTable';
 import { Sidebar, NavigationTab } from '@/components/Sidebar';
 import { MasterStatusView } from '@/components/MasterStatusView';
-import { MasterVehiclesView } from '@/components/MasterVehiclesView';
-import { MasterBranchesView } from '@/components/MasterBranchesView';
-import { MasterCargoTypesView } from '@/components/MasterCargoTypesView';
+import { MasterSimTypesView } from '@/components/MasterSimTypesView';
+import { MasterTaskTypesView } from '@/components/MasterTaskTypesView';
 import { NewOrderModal } from '@/components/NewOrderModal';
 import { DriverHistoryModal } from '@/components/DriverHistoryModal';
 import { ExportModal } from '@/components/ExportModal';
@@ -36,8 +35,7 @@ export default function DispatcherDashboardPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   
-  // Filter States (Poin 6.1 & 6.2)
-  const [selectedBranch, setSelectedBranch] = useState<string>('Semua Cabang');
+  // Filter States
   const [selectedStatus, setSelectedStatus] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('harian');
@@ -64,19 +62,14 @@ export default function DispatcherDashboardPage() {
       subtitle: 'Data referensi status ketersediaan personil driver armada',
       category: 'Master Data',
     },
-    'master-vehicles': {
-      title: 'Master Jenis Kendaraan',
-      subtitle: 'Data armada pengiriman dan kapasitas muatan',
+    'master-sim-types': {
+      title: 'Master Jenis SIM',
+      subtitle: 'Data referensi klasifikasi surat izin mengemudi driver armada',
       category: 'Master Data',
     },
-    'master-branches': {
-      title: 'Master Cabang & Hub',
-      subtitle: 'Data cabang operasional dan titik logistik pengiriman',
-      category: 'Master Data',
-    },
-    'master-cargo-types': {
-      title: 'Master Jenis Muatan',
-      subtitle: 'Klasifikasi muatan dan instruksi penanganan paket pengiriman',
+    'master-task-types': {
+      title: 'Master Jenis Tugas',
+      subtitle: 'Data referensi penugasan armada: Replace, Short Term, Antar & Tarik Short Term',
       category: 'Master Data',
     },
   };
@@ -139,55 +132,46 @@ export default function DispatcherDashboardPage() {
   }, [fetchDatabaseData]);
 
   // Branch filtered drivers
-  const branchFilteredDrivers = useMemo(() => {
-    if (selectedBranch === 'Semua Cabang') return drivers;
-    return drivers.filter((d) => d.branch === selectedBranch);
-  }, [drivers, selectedBranch]);
-
-  // Table filtered drivers (Search + Status + Branch)
+  // Table filtered drivers (Search + Status)
   const displayDrivers = useMemo(() => {
-    return branchFilteredDrivers.filter((driver) => {
+    return drivers.filter((driver) => {
       const matchStatus = selectedStatus === 'Semua' || driver.status === selectedStatus;
       const matchSearch =
         searchQuery.trim() === '' ||
         driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         driver.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        driver.plateNumber.toLowerCase().includes(searchQuery.toLowerCase());
+        (driver.simType && driver.simType.toLowerCase().includes(searchQuery.toLowerCase()));
 
       return matchStatus && matchSearch;
     });
-  }, [branchFilteredDrivers, selectedStatus, searchQuery]);
+  }, [drivers, selectedStatus, searchQuery]);
 
   // Unassigned orders
   const unassignedOrders = useMemo(() => {
-    return orders.filter((o) => {
-      const isUnassigned = o.status === 'Belum Ditugaskan' || !o.assignedDriverId;
-      const matchBranch = selectedBranch === 'Semua Cabang' || o.branch === selectedBranch;
-      return isUnassigned && matchBranch;
-    });
-  }, [orders, selectedBranch]);
+    return orders.filter((o) => o.status === 'Belum Ditugaskan' || !o.assignedDriverId);
+  }, [orders]);
 
   // Standby / Available drivers
   const readyDriversList = useMemo(() => {
-    return branchFilteredDrivers.filter((d) => d.status === 'Ready');
-  }, [branchFilteredDrivers]);
+    return drivers.filter((d) => d.status === 'Ready');
+  }, [drivers]);
 
   // Calculate dynamic KPI metrics
   const kpiData: KPIData = useMemo(() => {
-    const totalDrivers = branchFilteredDrivers.length;
-    const readyDrivers = branchFilteredDrivers.filter((d) => d.status === 'Ready').length;
-    const tripDrivers = branchFilteredDrivers.filter((d) => d.status === 'Trip').length;
-    const waitingAssignmentDrivers = branchFilteredDrivers.filter(
+    const totalDrivers = drivers.length;
+    const readyDrivers = drivers.filter((d) => d.status === 'Ready').length;
+    const tripDrivers = drivers.filter((d) => d.status === 'Trip').length;
+    const waitingAssignmentDrivers = drivers.filter(
       (d) => d.status === 'Menunggu Assignment'
     ).length;
-    const offOrLeaveDrivers = branchFilteredDrivers.filter(
+    const offOrLeaveDrivers = drivers.filter(
       (d) => d.status === 'Izin' || d.status === 'Off'
     ).length;
 
-    const ordersCompleted = branchFilteredDrivers.reduce((acc, d) => acc + d.completedTasks, 0);
-    const ordersInProgress = branchFilteredDrivers.reduce((acc, d) => acc + d.inProgressTasks, 0);
-    const ordersReceived = branchFilteredDrivers.reduce((acc, d) => acc + d.pendingTasks, 0);
-    const ordersCancelled = branchFilteredDrivers.reduce((acc, d) => acc + d.cancelledTasks, 0);
+    const ordersCompleted = drivers.reduce((acc, d) => acc + d.completedTasks, 0);
+    const ordersInProgress = drivers.reduce((acc, d) => acc + d.inProgressTasks, 0);
+    const ordersReceived = drivers.reduce((acc, d) => acc + d.pendingTasks, 0);
+    const ordersCancelled = drivers.reduce((acc, d) => acc + d.cancelledTasks, 0);
     const ordersUnassigned = unassignedOrders.length;
 
     const totalOrders = ordersCompleted + ordersInProgress + ordersReceived + ordersCancelled + ordersUnassigned;
@@ -216,7 +200,7 @@ export default function DispatcherDashboardPage() {
       targetOrders,
       realizationRate,
     };
-  }, [branchFilteredDrivers, unassignedOrders, timeFrame]);
+  }, [drivers, unassignedOrders, timeFrame]);
 
   // Handler: Change driver status directly with PostgreSQL persistence
   const handleChangeDriverStatus = async (driverId: string, newStatus: DriverStatus) => {
@@ -588,8 +572,6 @@ export default function DispatcherDashboardPage() {
           title={tabMeta[activeTab].title}
           subtitle={tabMeta[activeTab].subtitle}
           showTimeFrame={activeTab === 'dashboard'}
-          selectedBranch={selectedBranch}
-          onSelectBranch={setSelectedBranch}
           timeFrame={timeFrame}
           onChangeTimeFrame={setTimeFrame}
           unassignedCount={unassignedOrders.length}
@@ -632,7 +614,7 @@ export default function DispatcherDashboardPage() {
 
               {/* Bagian Tengah: Visualisasi Grafik & Leaderboard (Poin 2.5, 7, 6.9, 6.10) */}
               <ChartsSection
-                drivers={branchFilteredDrivers}
+                drivers={drivers}
                 kpi={kpiData}
                 onSelectDriverForHistory={(driver) => setSelectedDriverForHistory(driver)}
               />
@@ -671,8 +653,6 @@ export default function DispatcherDashboardPage() {
             <OrderMonitoringTable
               orders={orders}
               drivers={drivers}
-              selectedBranch={selectedBranch}
-              onSelectBranch={setSelectedBranch}
               onOpenNewOrder={() => {
                 setPreSelectedDriverForOrder(null);
                 setIsNewOrderOpen(true);
@@ -689,19 +669,14 @@ export default function DispatcherDashboardPage() {
             <MasterStatusView />
           )}
 
-          {/* TAB 4: Master Data Jenis Kendaraan (Terhubung ke Table Driver) */}
-          {activeTab === 'master-vehicles' && (
-            <MasterVehiclesView />
+          {/* TAB 4: Master Data Jenis SIM (Terhubung ke Table Driver) */}
+          {activeTab === 'master-sim-types' && (
+            <MasterSimTypesView />
           )}
 
-          {/* TAB 5: Master Data Cabang (Terhubung ke Table Driver) */}
-          {activeTab === 'master-branches' && (
-            <MasterBranchesView />
-          )}
-
-          {/* TAB 6: Master Data Jenis Muatan (Terhubung ke Table Order) */}
-          {activeTab === 'master-cargo-types' && (
-            <MasterCargoTypesView />
+          {/* TAB 5: Master Data Jenis Tugas (Terhubung ke Table Order) */}
+          {activeTab === 'master-task-types' && (
+            <MasterTaskTypesView />
           )}
 
         </main>
@@ -763,18 +738,17 @@ export default function DispatcherDashboardPage() {
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
-        drivers={branchFilteredDrivers}
-        orders={orders.filter((o) => selectedBranch === 'Semua Cabang' || o.branch === selectedBranch)}
+        drivers={drivers}
+        orders={orders}
         kpi={kpiData}
         currentTimeFrame={timeFrame}
-        selectedBranch={selectedBranch}
       />
 
       <UnassignedOrdersModal
         isOpen={isUnassignedOpen}
         onClose={() => setIsUnassignedOpen(false)}
         unassignedOrders={unassignedOrders}
-        availableDrivers={branchFilteredDrivers.filter(
+        availableDrivers={drivers.filter(
           (d) => d.status === 'Ready' || d.status === 'Menunggu Assignment'
         )}
         onAssignOrderToDriver={handleAssignOrderToDriver}

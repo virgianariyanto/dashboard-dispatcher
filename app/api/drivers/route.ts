@@ -6,6 +6,8 @@ export async function GET() {
   try {
     const drivers = await prisma.driver.findMany({
       include: {
+        simTypeObj: true,
+        driverStatusObj: true,
         taskHistories: {
           orderBy: {
             createdAt: 'desc',
@@ -19,6 +21,7 @@ export async function GET() {
 
     const formatted = drivers.map((d) => ({
       ...d,
+      simType: d.simTypeObj?.name || d.simType,
       taskHistory: d.taskHistories,
     }));
 
@@ -39,18 +42,16 @@ export async function POST(request: Request) {
     const {
       name,
       phone,
-      vehicleType,
-      plateNumber,
-      branch,
+      simType,
       status,
       startTime,
       endTime,
       notes,
     } = body;
 
-    if (!name || !plateNumber || !branch) {
+    if (!name) {
       return NextResponse.json(
-        { success: false, error: 'Nama, Nomor Plat, dan Cabang wajib diisi' },
+        { success: false, error: 'Nama driver wajib diisi' },
         { status: 400 }
       );
     }
@@ -77,20 +78,12 @@ export async function POST(request: Request) {
       if (st) resolvedStatusId = st.id;
     }
 
-    let resolvedVehicleTypeId = body.vehicleTypeId;
-    if (!resolvedVehicleTypeId && vehicleType) {
-      const vh = await prisma.vehicleType.findFirst({
-        where: { OR: [{ name: vehicleType }, { code: vehicleType }] },
+    let resolvedSimTypeId = body.simTypeId;
+    if (!resolvedSimTypeId && simType) {
+      const sim = await prisma.simType.findFirst({
+        where: { OR: [{ name: simType }, { code: simType }] },
       });
-      if (vh) resolvedVehicleTypeId = vh.id;
-    }
-
-    let resolvedBranchId = body.branchId;
-    if (!resolvedBranchId && branch) {
-      const br = await prisma.branch.findFirst({
-        where: { OR: [{ name: branch }, { code: branch }] },
-      });
-      if (br) resolvedBranchId = br.id;
+      if (sim) resolvedSimTypeId = sim.id;
     }
 
     const newDriver = await prisma.driver.create({
@@ -99,9 +92,7 @@ export async function POST(request: Request) {
         name,
         avatarUrl,
         phone: phone || '-',
-        vehicleType: vehicleType || 'Motor',
-        plateNumber,
-        branch,
+        simType: simType || 'SIM A',
         status: status || 'Ready',
         startTime: startTime || '08:00',
         endTime: endTime || '17:00',
@@ -115,11 +106,11 @@ export async function POST(request: Request) {
         rating: 5.0,
         performanceScore: 90,
         statusId: resolvedStatusId || null,
-        vehicleTypeId: resolvedVehicleTypeId || null,
-        branchId: resolvedBranchId || null,
+        simTypeId: resolvedSimTypeId || null,
       },
       include: {
         taskHistories: true,
+        simTypeObj: true,
       },
     });
 
@@ -147,9 +138,7 @@ export async function PUT(request: Request) {
       id,
       name,
       phone,
-      vehicleType,
-      plateNumber,
-      branch,
+      simType,
       status,
       startTime,
       endTime,
@@ -172,20 +161,12 @@ export async function PUT(request: Request) {
       if (st) resolvedStatusId = st.id;
     }
 
-    let resolvedVehicleTypeId = body.vehicleTypeId;
-    if (!resolvedVehicleTypeId && vehicleType) {
-      const vh = await prisma.vehicleType.findFirst({
-        where: { OR: [{ name: vehicleType }, { code: vehicleType }] },
+    let resolvedSimTypeId = body.simTypeId;
+    if (!resolvedSimTypeId && simType) {
+      const sim = await prisma.simType.findFirst({
+        where: { OR: [{ name: simType }, { code: simType }] },
       });
-      if (vh) resolvedVehicleTypeId = vh.id;
-    }
-
-    let resolvedBranchId = body.branchId;
-    if (!resolvedBranchId && branch) {
-      const br = await prisma.branch.findFirst({
-        where: { OR: [{ name: branch }, { code: branch }] },
-      });
-      if (br) resolvedBranchId = br.id;
+      if (sim) resolvedSimTypeId = sim.id;
     }
 
     const updated = await prisma.driver.update({
@@ -193,16 +174,13 @@ export async function PUT(request: Request) {
       data: {
         name,
         phone,
-        vehicleType,
-        plateNumber,
-        branch,
+        simType: simType || 'SIM A',
         status,
         startTime,
         endTime,
         notes,
         ...(resolvedStatusId ? { statusId: resolvedStatusId } : {}),
-        ...(resolvedVehicleTypeId ? { vehicleTypeId: resolvedVehicleTypeId } : {}),
-        ...(resolvedBranchId ? { branchId: resolvedBranchId } : {}),
+        ...(resolvedSimTypeId ? { simTypeId: resolvedSimTypeId } : {}),
       },
       include: {
         taskHistories: {
@@ -210,6 +188,7 @@ export async function PUT(request: Request) {
             createdAt: 'desc',
           },
         },
+        simTypeObj: true,
       },
     });
 
@@ -217,6 +196,7 @@ export async function PUT(request: Request) {
       success: true,
       data: {
         ...updated,
+        simType: updated.simTypeObj?.name || updated.simType,
         taskHistory: updated.taskHistories,
       },
     });
@@ -279,6 +259,7 @@ export async function PATCH(request: Request) {
             createdAt: 'desc',
           },
         },
+        simTypeObj: true,
       },
     });
 
@@ -286,6 +267,7 @@ export async function PATCH(request: Request) {
       success: true,
       data: {
         ...updated,
+        simType: updated.simTypeObj?.name || updated.simType,
         taskHistory: updated.taskHistories,
       },
     });

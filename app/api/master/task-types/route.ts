@@ -3,25 +3,25 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const vehicles = await prisma.vehicleType.findMany({
+    const taskTypes = await prisma.taskType.findMany({
       include: {
         _count: {
-          select: { drivers: true },
+          select: { orders: true },
         },
       },
       orderBy: { createdAt: 'asc' },
     });
 
-    const formatted = vehicles.map((v) => ({
-      ...v,
-      driverCount: v._count.drivers,
+    const formatted = taskTypes.map((t) => ({
+      ...t,
+      orderCount: t._count.orders,
     }));
 
     return NextResponse.json({ success: true, data: formatted });
   } catch (error) {
-    console.error('Error fetching vehicle types:', error);
+    console.error('Error fetching task types:', error);
     return NextResponse.json(
-      { success: false, error: 'Gagal mengambil data jenis kendaraan' },
+      { success: false, error: 'Gagal mengambil data jenis tugas' },
       { status: 500 }
     );
   }
@@ -30,30 +30,28 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { code, name, category, maxWeightCapacity, description } = body;
+    const { code, name, description } = body;
 
     if (!code || !name) {
       return NextResponse.json(
-        { success: false, error: 'Kode dan Nama Kendaraan wajib diisi' },
+        { success: false, error: 'Kode dan Nama Jenis Tugas wajib diisi' },
         { status: 400 }
       );
     }
 
-    const created = await prisma.vehicleType.create({
+    const created = await prisma.taskType.create({
       data: {
         code: code.toUpperCase().trim(),
         name,
-        category: category || 'Motor',
-        maxWeightCapacity: maxWeightCapacity ? parseFloat(maxWeightCapacity) : 0,
         description: description || null,
       },
     });
 
     return NextResponse.json({ success: true, data: created });
   } catch (error) {
-    console.error('Error creating vehicle type:', error);
+    console.error('Error creating task type:', error);
     return NextResponse.json(
-      { success: false, error: 'Gagal menambahkan jenis kendaraan baru (Kode mungkin sudah terdaftar)' },
+      { success: false, error: 'Gagal menambahkan jenis tugas baru (Kode mungkin sudah terdaftar)' },
       { status: 500 }
     );
   }
@@ -62,31 +60,29 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, code, name, category, maxWeightCapacity, description } = body;
+    const { id, code, name, description } = body;
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'ID Jenis Kendaraan diperlukan' },
+        { success: false, error: 'ID Jenis Tugas diperlukan' },
         { status: 400 }
       );
     }
 
-    const updated = await prisma.vehicleType.update({
+    const updated = await prisma.taskType.update({
       where: { id },
       data: {
         code: code ? code.toUpperCase().trim() : undefined,
         name,
-        category,
-        maxWeightCapacity: maxWeightCapacity !== undefined ? parseFloat(maxWeightCapacity) : undefined,
         description,
       },
     });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error) {
-    console.error('Error updating vehicle type:', error);
+    console.error('Error updating task type:', error);
     return NextResponse.json(
-      { success: false, error: 'Gagal memperbarui jenis kendaraan' },
+      { success: false, error: 'Gagal memperbarui data jenis tugas' },
       { status: 500 }
     );
   }
@@ -99,25 +95,38 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Parameter id diperlukan' },
+        { success: false, error: 'ID Jenis Tugas diperlukan' },
         { status: 400 }
       );
     }
 
-    await prisma.driver.updateMany({
-      where: { vehicleTypeId: id },
-      data: { vehicleTypeId: null },
+    // Proteksi: jangan hapus jika sedang digunakan oleh order
+    const inUse = await prisma.order.count({
+      where: { taskTypeId: id },
     });
 
-    await prisma.vehicleType.delete({
+    if (inUse > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Jenis tugas ini tidak dapat dihapus karena sedang digunakan oleh ${inUse} order aktif.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    await prisma.taskType.delete({
       where: { id },
     });
 
-    return NextResponse.json({ success: true, message: 'Jenis kendaraan berhasil dihapus' });
+    return NextResponse.json({
+      success: true,
+      message: 'Jenis tugas berhasil dihapus dari database',
+    });
   } catch (error) {
-    console.error('Error deleting vehicle type:', error);
+    console.error('Error deleting task type:', error);
     return NextResponse.json(
-      { success: false, error: 'Gagal menghapus jenis kendaraan' },
+      { success: false, error: 'Gagal menghapus jenis tugas' },
       { status: 500 }
     );
   }
