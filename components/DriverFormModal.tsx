@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, UserCheck, Truck, Phone, MapPin, Clock, FileText } from 'lucide-react';
+import { X, UserPlus, UserCheck, Phone, Clock, FileText, CreditCard } from 'lucide-react';
 import { Driver, DriverStatus } from '@/types/dispatcher';
-import { BRANCH_LIST } from '@/data/initialData';
 
 interface DriverFormModalProps {
   isOpen: boolean;
@@ -22,9 +21,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [vehicleType, setVehicleType] = useState('Motor (Honda Vario 160)');
-  const [plateNumber, setPlateNumber] = useState('');
-  const [branch, setBranch] = useState('Jakarta Pusat');
+  const [simType, setSimType] = useState('SIM A');
   const [status, setStatus] = useState<DriverStatus>('Ready');
   const [startTime, setStartTime] = useState('08:00');
   const [endTime, setEndTime] = useState('17:00');
@@ -32,17 +29,15 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
 
   // Dynamic master data lists
   const [masterStatuses, setMasterStatuses] = useState<{ code: string; name: string }[]>([]);
-  const [masterVehicles, setMasterVehicles] = useState<{ code: string; name: string }[]>([]);
-  const [masterBranches, setMasterBranches] = useState<{ code: string; name: string }[]>([]);
+  const [masterSimTypes, setMasterSimTypes] = useState<{ code: string; name: string }[]>([]);
 
   useEffect(() => {
     // Fetch dynamic options from Master Data APIs
     const loadMasterData = async () => {
       try {
-        const [stRes, vhRes, brRes] = await Promise.all([
+        const [stRes, simRes] = await Promise.all([
           fetch('/api/master/status'),
-          fetch('/api/master/vehicles'),
-          fetch('/api/master/branches'),
+          fetch('/api/master/sim-types'),
         ]);
 
         if (stRes.ok) {
@@ -51,16 +46,10 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
             setMasterStatuses(json.data);
           }
         }
-        if (vhRes.ok) {
-          const json = await vhRes.json();
+        if (simRes.ok) {
+          const json = await simRes.json();
           if (json.success && json.data.length > 0) {
-            setMasterVehicles(json.data);
-          }
-        }
-        if (brRes.ok) {
-          const json = await brRes.json();
-          if (json.success && json.data.length > 0) {
-            setMasterBranches(json.data);
+            setMasterSimTypes(json.data);
           }
         }
       } catch (err) {
@@ -77,9 +66,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
     if (driverToEdit) {
       setName(driverToEdit.name);
       setPhone(driverToEdit.phone || '');
-      setVehicleType(driverToEdit.vehicleType);
-      setPlateNumber(driverToEdit.plateNumber);
-      setBranch(driverToEdit.branch);
+      setSimType(driverToEdit.simType || 'SIM A');
       setStatus(driverToEdit.status);
       setStartTime(driverToEdit.startTime || '08:00');
       setEndTime(driverToEdit.endTime || '17:00');
@@ -87,9 +74,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
     } else {
       setName('');
       setPhone('');
-      setVehicleType('Motor (Honda Vario 160)');
-      setPlateNumber('');
-      setBranch('Jakarta Pusat');
+      setSimType('SIM A');
       setStatus('Ready');
       setStartTime('08:00');
       setEndTime('17:00');
@@ -101,18 +86,16 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !plateNumber) {
-      alert('Nama driver dan Plat nomor wajib diisi.');
+    if (!name.trim()) {
+      alert('Nama driver wajib diisi.');
       return;
     }
 
     const payload: Partial<Driver> = {
       ...(isEditMode && driverToEdit ? { id: driverToEdit.id } : {}),
-      name,
+      name: name.trim(),
       phone: phone || '-',
-      vehicleType,
-      plateNumber: plateNumber.toUpperCase(),
-      branch,
+      simType,
       status,
       startTime,
       endTime,
@@ -139,7 +122,7 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
               </h3>
               <p className="text-xs text-slate-500">
                 {isEditMode
-                  ? 'Perbarui data identitas, armada, dan penempatan driver'
+                  ? 'Perbarui data identitas dan kualifikasi lisensi driver'
                   : 'Daftarkan personil driver baru yang terhubung ke data master'}
               </p>
             </div>
@@ -186,74 +169,34 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
             </div>
           </div>
 
-          {/* Jenis Kendaraan & Nomor Plat */}
+          {/* Jenis SIM & Status Awal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1">
-                  <Truck className="w-3 h-3 text-slate-500" />
-                  Jenis Kendaraan
+                  <CreditCard className="w-3.5 h-3.5 text-blue-600" />
+                  Jenis SIM *
                 </span>
-                <span className="text-[10px] text-emerald-600 font-mono">Master Kendaraan</span>
+                <span className="text-[10px] text-blue-600 font-mono">Master SIM</span>
               </label>
               <select
-                value={vehicleType}
-                onChange={(e) => setVehicleType(e.target.value)}
+                value={simType}
+                onChange={(e) => setSimType(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               >
-                {masterVehicles.length > 0 ? (
-                  masterVehicles.map((v) => (
-                    <option key={v.code} value={v.name}>{v.name}</option>
+                {masterSimTypes.length > 0 ? (
+                  masterSimTypes.map((s) => (
+                    <option key={s.code} value={s.name}>{s.name}</option>
                   ))
                 ) : (
                   <>
-                    <option value="Motor (Honda Vario 160)">Motor (Honda Vario 160)</option>
-                    <option value="Motor (Yamaha NMAX)">Motor (Yamaha NMAX)</option>
-                    <option value="Mobil Box (Gran Max Blind Van)">Mobil Box (Gran Max Blind Van)</option>
-                    <option value="Mobil Box (Isuzu Traga)">Mobil Box (Isuzu Traga)</option>
+                    <option value="SIM A">SIM A (Mobil Pribadi/Barang &lt;3.5t)</option>
+                    <option value="SIM B1">SIM B1 (Bus & Truk Perseorangan)</option>
+                    <option value="SIM B2">SIM B2 (Alat Berat & Gandengan)</option>
+                    <option value="SIM B1 Umum">SIM B1 Umum (Angkutan Umum/Barang)</option>
+                    <option value="SIM B2 Umum">SIM B2 Umum (Kontainer/Gandengan)</option>
+                    <option value="SIM C">SIM C (Sepeda Motor)</option>
                   </>
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Nomor Plat Polisi *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Contoh: B 1234 KLA"
-                value={plateNumber}
-                onChange={(e) => setPlateNumber(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 uppercase font-mono focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-              />
-            </div>
-          </div>
-
-          {/* Cabang & Status Awal */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-slate-500" />
-                  Cabang Operasi
-                </span>
-                <span className="text-[10px] text-purple-600 font-mono">Master Cabang</span>
-              </label>
-              <select
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-              >
-                {masterBranches.length > 0 ? (
-                  masterBranches.map((b) => (
-                    <option key={b.code} value={b.name}>{b.name}</option>
-                  ))
-                ) : (
-                  BRANCH_LIST.filter((b) => b !== 'Semua Cabang').map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))
                 )}
               </select>
             </div>
@@ -317,11 +260,11 @@ export const DriverFormModal: React.FC<DriverFormModalProps> = ({
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
               <FileText className="w-3 h-3 text-slate-500" />
-              Catatan / Wilayah Tugas Khusus
+              Catatan / Keterangan Driver
             </label>
             <textarea
               rows={2}
-              placeholder="Contoh: Standby di Hub Dago, siap antar paket rute luar kota..."
+              placeholder="Contoh: Driver berpengalaman rute antarkota, siap lembur..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white resize-none transition-colors"

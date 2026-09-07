@@ -31,9 +31,8 @@ export interface Driver {
   name: string;
   avatarUrl: string;
   phone: string;
-  vehicleType: string;
-  plateNumber: string;
-  branch: string;
+  simType: string;
+  simTypeId?: string;
   status: DriverStatus;
   startTime: string;
   endTime: string;
@@ -55,24 +54,38 @@ export interface Order {
   customer: string;
   pickupLocation: string;
   dropoffLocation: string;
-  branch: string;
   status: OrderStatus;
   assignedDriverId?: string;
   assignedDriverName?: string;
   createdAt: string;
   targetDeliveryTime: string;
-  packageType: string;
+  taskType: string;
   priority: 'Normal' | 'Tinggi' | 'Urgent';
   notes?: string;
-  branchId?: string;
-  cargoTypeId?: string;
+  taskTypeId?: string;
 }
 
 export interface FilterState {
   search: string;
   status: string; // 'Semua' or specific DriverStatus
-  branch: string; // 'Semua Cabang' or specific branch
   timeFrame: TimeFrame;
+}
+
+export interface SimTypeItem {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  description?: string;
+  driverCount?: number;
+}
+
+export interface TaskTypeItem {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  orderCount?: number;
 }
 
 export interface KPIData {

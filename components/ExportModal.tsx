@@ -11,7 +11,6 @@ interface ExportModalProps {
   orders?: Order[];
   kpi: KPIData;
   currentTimeFrame: TimeFrame;
-  selectedBranch: string;
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
@@ -21,7 +20,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   orders = [],
   kpi,
   currentTimeFrame,
-  selectedBranch,
 }) => {
   const [reportType, setReportType] = useState<'drivers' | 'orders'>('drivers');
   const [format, setFormat] = useState<'excel' | 'pdf'>('excel');
@@ -38,9 +36,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         'No',
         'ID Driver',
         'Nama Driver',
-        'Plat Nomor',
-        'Jenis Kendaraan',
-        'Cabang Operasi',
+        'Jenis SIM',
         'Status Driver',
         'Jam Mulai',
         'Jam Selesai',
@@ -59,9 +55,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         idx + 1,
         `"${d.id}"`,
         `"${d.name}"`,
-        `"${d.plateNumber}"`,
-        `"${d.vehicleType}"`,
-        `"${d.branch}"`,
+        `"${d.simType || '-'}"`,
         `"${d.status}"`,
         `"${d.startTime}"`,
         `"${d.endTime}"`,
@@ -79,7 +73,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const csvContent =
         BOM +
         `"REKAP MONITORING DISPATCHER DRIVER - PERIODE ${reportPeriod.toUpperCase()}"\n` +
-        `"Cabang: ${selectedBranch} | Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
+        `"Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
         headers.join(',') +
         '\n' +
         rows.map((r) => r.join(',')).join('\n');
@@ -90,7 +84,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       link.href = url;
       link.setAttribute(
         'download',
-        `Laporan_Driver_${selectedBranch.replace(/\s+/g, '_')}_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
+        `Laporan_Driver_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
       );
       document.body.appendChild(link);
       link.click();
@@ -102,10 +96,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         'Nama Customer',
         'Lokasi Penjemputan',
         'Lokasi Pengantaran',
-        'Jenis Muatan',
+        'Jenis Tugas',
         'Prioritas',
         'Driver Bertugas',
-        'Cabang',
         'Status Pengiriman',
         'Target Pengiriman',
         'Waktu Dibuat',
@@ -117,10 +110,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         `"${o.customer}"`,
         `"${(o.pickupLocation || '').replace(/"/g, '""')}"`,
         `"${(o.dropoffLocation || '').replace(/"/g, '""')}"`,
-        `"${o.packageType || '-'}"`,
+        `"${o.taskType || '-'}"`,
         `"${o.priority || 'Normal'}"`,
         `"${o.assignedDriverName || 'Belum Ditugaskan'}"`,
-        `"${o.branch}"`,
         `"${o.status}"`,
         `"${o.targetDeliveryTime || '-'}"`,
         `"${o.createdAt || '-'}"`,
@@ -129,7 +121,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const csvContent =
         BOM +
         `"REKAP MONITORING ORDER & LOGISTIK - PERIODE ${reportPeriod.toUpperCase()}"\n` +
-        `"Cabang: ${selectedBranch} | Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
+        `"Waktu Ekspor: ${new Date().toLocaleString('id-ID')}"\n\n` +
         headers.join(',') +
         '\n' +
         rows.map((r) => r.join(',')).join('\n');
@@ -140,7 +132,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       link.href = url;
       link.setAttribute(
         'download',
-        `Laporan_Order_${selectedBranch.replace(/\s+/g, '_')}_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
+        `Laporan_Order_${reportPeriod}_${new Date().toISOString().slice(0, 10)}.csv`
       );
       document.body.appendChild(link);
       link.click();
@@ -219,7 +211,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <ClipboardList className="w-4 h-4 text-amber-600" />
                 <div className="text-left">
                   <div className="font-bold text-xs">Data Order</div>
-                  <div className="text-[10px] text-slate-500">Muatan & Pengiriman</div>
+                  <div className="text-[10px] text-slate-500">Tugas & Pengiriman</div>
                 </div>
               </button>
             </div>
@@ -294,8 +286,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               </span>
             </div>
             <div className="flex justify-between text-[11px]">
-              <span className="text-slate-500">Cabang Terpilih:</span>
-              <span className="font-medium text-blue-600 font-semibold">{selectedBranch}</span>
+              <span className="text-slate-500">Periode Terpilih:</span>
+              <span className="font-medium text-blue-600 font-semibold capitalize">{reportPeriod}</span>
             </div>
             <div className="flex justify-between text-[11px]">
               <span className="text-slate-500">

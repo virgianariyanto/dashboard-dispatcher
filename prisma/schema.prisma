@@ -20,44 +20,27 @@ model DriverStatus {
   drivers     Driver[]
 }
 
-model VehicleType {
-  id                String   @id @default(cuid())
-  code              String   @unique
-  name              String
-  category          String   @default("Motor") // 'Motor' | 'Mobil Box' | 'Truk' | 'Pick-Up'
-  maxWeightCapacity Float?   @default(0)
-  description       String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+model SimType {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  category    String   @default("Kendaraan Ringan")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  drivers           Driver[]
+  drivers     Driver[]
 }
 
-model Branch {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  name      String
-  city      String
-  address   String?
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model TaskType {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  drivers   Driver[]
-  orders    Order[]
-}
-
-model CargoType {
-  id                  String   @id @default(cuid())
-  code                String   @unique
-  name                String
-  category            String   @default("Standard") // 'Standard' | 'Dokumen' | 'Khusus' | 'Sensitif' | 'Makanan'
-  handlingInstruction String?
-  description         String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  orders              Order[]
+  orders      Order[]
 }
 
 model Driver {
@@ -65,9 +48,7 @@ model Driver {
   name             String
   avatarUrl        String
   phone            String
-  vehicleType      String
-  plateNumber      String
-  branch           String
+  simType          String         @default("SIM A")
   status           String
   startTime        String
   endTime          String
@@ -84,12 +65,10 @@ model Driver {
   updatedAt        DateTime       @updatedAt
 
   statusId         String?
-  vehicleTypeId    String?
-  branchId         String?
+  simTypeId        String?
 
   driverStatusObj  DriverStatus?  @relation(fields: [statusId], references: [id], onDelete: SetNull)
-  vehicleTypeObj   VehicleType?   @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
-  branchObj        Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  simTypeObj       SimType?       @relation(fields: [simTypeId], references: [id], onDelete: SetNull)
 
   orders           Order[]
   taskHistories    TaskHistory[]
@@ -101,21 +80,18 @@ model Order {
   customer           String
   pickupLocation     String
   dropoffLocation    String
-  branch             String
   status             String
   assignedDriverId   String?
   assignedDriverName String?
   createdAt          DateTime   @default(now())
   targetDeliveryTime String     @default("Dalam 2 Jam")
-  packageType        String     @default("Paket Reguler")
+  taskType           String     @default("Replace")
   priority           String     @default("Normal")
   notes              String?
-  branchId           String?
-  cargoTypeId        String?
+  taskTypeId         String?
 
   driver             Driver?    @relation(fields: [assignedDriverId], references: [id], onDelete: SetNull)
-  branchObj          Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
-  cargoTypeObj       CargoType? @relation(fields: [cargoTypeId], references: [id], onDelete: SetNull)
+  taskTypeObj        TaskType?  @relation(fields: [taskTypeId], references: [id], onDelete: SetNull)
 }
 
 model TaskHistory {

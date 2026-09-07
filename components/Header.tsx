@@ -5,20 +5,16 @@ import {
   PlusCircle, 
   Download, 
   Bell, 
-  MapPin, 
   RefreshCw,
   LogOut
 } from 'lucide-react';
 import { TimeFrame } from '@/types/dispatcher';
-import { BRANCH_LIST } from '@/data/initialData';
 
 interface HeaderProps {
   title?: string;
   subtitle?: string;
   category?: string;
   showTimeFrame?: boolean;
-  selectedBranch: string;
-  onSelectBranch: (branch: string) => void;
   timeFrame: TimeFrame;
   onChangeTimeFrame: (tf: TimeFrame) => void;
   unassignedCount: number;
@@ -35,8 +31,6 @@ export const Header: React.FC<HeaderProps> = ({
   subtitle,
   category = 'Operasional',
   showTimeFrame = false,
-  selectedBranch,
-  onSelectBranch,
   timeFrame,
   onChangeTimeFrame,
   unassignedCount,
@@ -89,23 +83,6 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right: Focused Operational Controls */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            
-            {/* Cabang Filter */}
-            <div className="flex items-center bg-slate-50 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-700 shadow-2xs">
-              <MapPin className="w-3.5 h-3.5 text-slate-400 mr-1.5 shrink-0" />
-              <select
-                value={selectedBranch}
-                onChange={(e) => onSelectBranch(e.target.value)}
-                className="bg-transparent text-slate-700 focus:outline-none cursor-pointer pr-1 font-medium text-xs"
-                aria-label="Pilih Cabang"
-              >
-                {BRANCH_LIST.map((b) => (
-                  <option key={b} value={b} className="bg-white text-slate-700">
-                    {b}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             {/* TimeFrame (Harian, Mingguan, Bulanan) */}
             {showTimeFrame && (

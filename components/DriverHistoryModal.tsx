@@ -11,8 +11,7 @@ import {
   Hourglass, 
   XCircle, 
   Star, 
-  Phone, 
-  Truck 
+  Phone
 } from 'lucide-react';
 import { Driver, TaskHistoryItem } from '@/types/dispatcher';
 
@@ -108,9 +107,10 @@ export const DriverHistoryModal: React.FC<DriverHistoryModalProps> = ({
           </div>
 
           <div>
-            <span className="text-[11px] text-slate-500 block">Armada & Plat:</span>
-            <span className="font-semibold text-slate-800">{driver.vehicleType.split('(')[0]}</span>
-            <span className="block font-mono text-blue-600 text-[11px] font-semibold">{driver.plateNumber}</span>
+            <span className="text-[11px] text-slate-500 block">Jenis SIM:</span>
+            <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              {driver.simType}
+            </span>
           </div>
 
           <div>

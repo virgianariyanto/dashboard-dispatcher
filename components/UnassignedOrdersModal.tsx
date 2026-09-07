@@ -96,7 +96,7 @@ export const UnassignedOrdersModal: React.FC<UnassignedOrdersModalProps> = ({
                 {/* Assignment Dropdown & Button */}
                 <div className="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div className="text-[11px] text-slate-500">
-                    Muatan: <span className="text-slate-800 font-medium">{order.packageType}</span>
+                    Jenis Tugas: <span className="text-slate-800 font-medium">{order.taskType}</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export const UnassignedOrdersModal: React.FC<UnassignedOrdersModalProps> = ({
                       <option value="">-- Pilih Driver Standby --</option>
                       {availableDrivers.map((d) => (
                         <option key={d.id} value={d.id}>
-                          {d.name} ({d.status} • {d.vehicleType.split(' ')[0]})
+                          {d.name} ({d.status} • {d.simType})
                         </option>
                       ))}
                     </select>

@@ -50,12 +50,8 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
 
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
             <div className="flex justify-between">
-              <span className="text-slate-500">Plat Kendaraan:</span>
-              <span className="font-mono font-bold text-slate-900">{driver.plateNumber}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Cabang:</span>
-              <span className="text-slate-800 font-medium">{driver.branch}</span>
+              <span className="text-slate-500">Jenis SIM:</span>
+              <span className="font-semibold text-blue-600">{driver.simType}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Total Riwayat Tugas:</span>

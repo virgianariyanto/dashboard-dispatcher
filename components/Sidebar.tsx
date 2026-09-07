@@ -5,12 +5,12 @@ import {
   LayoutDashboard, 
   Truck, 
   Tag, 
-  Car, 
-  Building2, 
+  CreditCard, 
   ChevronRight,
   ShieldCheck, 
   Package, 
   ClipboardList,
+  ClipboardCheck,
   LogOut
 } from 'lucide-react';
 
@@ -19,9 +19,8 @@ export type NavigationTab =
   | 'drivers' 
   | 'orders' 
   | 'master-status' 
-  | 'master-vehicles' 
-  | 'master-branches'
-  | 'master-cargo-types';
+  | 'master-sim-types' 
+  | 'master-task-types';
 
 interface SidebarProps {
   activeTab: NavigationTab;
@@ -129,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Section 2: Master Data (Terhubung ke Driver) */}
+        {/* Section 2: Master Data (Terhubung ke Driver & Order) */}
         <div>
           <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             <span>Master Data</span>
@@ -151,52 +150,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {activeTab === 'master-status' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
             </button>
 
-            {/* Master Jenis Kendaraan */}
+            {/* Master Jenis SIM */}
             <button
-              onClick={() => onSelectTab('master-vehicles')}
+              onClick={() => onSelectTab('master-sim-types')}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
-                activeTab === 'master-vehicles'
+                activeTab === 'master-sim-types'
                   ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Car className={`w-4 h-4 ${activeTab === 'master-vehicles' ? 'text-white' : 'text-emerald-500'}`} />
-                <span>Master Kendaraan</span>
+                <CreditCard className={`w-4 h-4 ${activeTab === 'master-sim-types' ? 'text-white' : 'text-blue-500'}`} />
+                <span>Master Jenis SIM</span>
               </div>
-              {activeTab === 'master-vehicles' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
+              {activeTab === 'master-sim-types' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
             </button>
 
-            {/* Master Cabang */}
+            {/* Master Jenis Tugas */}
             <button
-              onClick={() => onSelectTab('master-branches')}
+              onClick={() => onSelectTab('master-task-types')}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
-                activeTab === 'master-branches'
+                activeTab === 'master-task-types'
                   ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Building2 className={`w-4 h-4 ${activeTab === 'master-branches' ? 'text-white' : 'text-purple-500'}`} />
-                <span>Master Cabang</span>
+                <ClipboardCheck className={`w-4 h-4 ${activeTab === 'master-task-types' ? 'text-white' : 'text-blue-600'}`} />
+                <span>Master Tugas</span>
               </div>
-              {activeTab === 'master-branches' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
-            </button>
-
-            {/* Master Jenis Muatan */}
-            <button
-              onClick={() => onSelectTab('master-cargo-types')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
-                activeTab === 'master-cargo-types'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Package className={`w-4 h-4 ${activeTab === 'master-cargo-types' ? 'text-white' : 'text-orange-500'}`} />
-                <span>Master Muatan</span>
-              </div>
-              {activeTab === 'master-cargo-types' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
+              {activeTab === 'master-task-types' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
             </button>
           </nav>
         </div>

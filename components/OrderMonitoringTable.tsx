@@ -11,8 +11,7 @@ import {
   PlayCircle, 
   Hourglass, 
   PlusCircle, 
-  Package, 
-  Building2, 
+  ClipboardCheck, 
   UserPlus, 
   AlertTriangle,
   Trash2
@@ -22,8 +21,6 @@ import { Order, Driver, OrderStatus } from '@/types/dispatcher';
 interface OrderMonitoringTableProps {
   orders: Order[];
   drivers: Driver[];
-  selectedBranch: string;
-  onSelectBranch: (branch: string) => void;
   onOpenNewOrder: () => void;
   onAssignOrder: (order: Order) => void;
   onCompleteOrder: (orderId: string) => void;
@@ -33,7 +30,6 @@ interface OrderMonitoringTableProps {
 
 export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
   orders,
-  selectedBranch,
   onOpenNewOrder,
   onAssignOrder,
   onCompleteOrder,
@@ -46,9 +42,6 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
   // Filtered Orders
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      // Branch filter
-      const matchBranch = selectedBranch === 'Semua Cabang' || order.branch === selectedBranch;
-
       // Status filter
       const matchStatus = statusFilter === 'Semua' || order.status === statusFilter;
 
@@ -61,11 +54,11 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
         order.pickupLocation.toLowerCase().includes(q) ||
         order.dropoffLocation.toLowerCase().includes(q) ||
         (order.assignedDriverName && order.assignedDriverName.toLowerCase().includes(q)) ||
-        (order.packageType && order.packageType.toLowerCase().includes(q));
+        (order.taskType && order.taskType.toLowerCase().includes(q));
 
-      return matchBranch && matchStatus && matchSearch;
+      return matchStatus && matchSearch;
     });
-  }, [orders, selectedBranch, statusFilter, searchQuery]);
+  }, [orders, statusFilter, searchQuery]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -250,8 +243,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
                 <th className="px-4 py-3.5">No. Order & Prioritas</th>
                 <th className="px-4 py-3.5">Customer & Waktu</th>
                 <th className="px-4 py-3.5">Rute (Pickup &rarr; Dropoff)</th>
-                <th className="px-4 py-3.5">Jenis Muatan</th>
-                <th className="px-4 py-3.5">Cabang Hub</th>
+                <th className="px-4 py-3.5">Jenis Tugas</th>
                 <th className="px-4 py-3.5">Driver Bertugas</th>
                 <th className="px-4 py-3.5">Status</th>
                 <th className="px-4 py-3.5 text-right">Aksi Dispatcher</th>
@@ -261,7 +253,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
             <tbody className="divide-y divide-slate-100">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-slate-400">
+                  <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
                     Tidak ada order yang sesuai filter atau pencarian.
                   </td>
                 </tr>
@@ -313,23 +305,15 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
                         </div>
                       </td>
 
-                      {/* Kolom 4: Jenis Muatan */}
+                      {/* Kolom 4: Jenis Tugas */}
                       <td className="px-4 py-3.5">
                         <div className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">
-                          <Package className="w-3 h-3 text-orange-500" />
-                          <span className="truncate max-w-[140px]">{ord.packageType}</span>
+                          <ClipboardCheck className="w-3 h-3 text-blue-600" />
+                          <span className="truncate max-w-[140px]">{ord.taskType}</span>
                         </div>
                       </td>
 
-                      {/* Kolom 5: Cabang */}
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-1.5 text-slate-700 text-[11px]">
-                          <Building2 className="w-3.5 h-3.5 text-purple-600" />
-                          <span>{ord.branch}</span>
-                        </div>
-                      </td>
-
-                      {/* Kolom 6: Driver Bertugas */}
+                      {/* Kolom 5: Driver Bertugas */}
                       <td className="px-4 py-3.5">
                         {ord.assignedDriverId ? (
                           <div className="flex items-center gap-2">

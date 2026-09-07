@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Truck, MapPin, Building, Package, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Plus, MapPin, ClipboardCheck } from 'lucide-react';
 import { Driver, Order, OrderStatus } from '@/types/dispatcher';
-import { BRANCH_LIST } from '@/data/initialData';
 
 interface NewOrderModalProps {
   isOpen: boolean;
@@ -23,17 +22,14 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   const [customer, setCustomer] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropoffLocation, setDropoffLocation] = useState('');
-  const [branch, setBranch] = useState('Jakarta Pusat');
-  const [packageType, setPackageType] = useState('Paket Reguler (Kardus/Box)');
+  const [taskType, setTaskType] = useState('Replace');
   const [priority, setPriority] = useState<'Normal' | 'Tinggi' | 'Urgent'>('Normal');
   const [assignedDriverId, setAssignedDriverId] = useState('');
   const [notes, setNotes] = useState('');
 
   // Master options from PostgreSQL
-  const [branchList, setBranchList] = useState<{ id: string; name: string; code: string }[]>([]);
-  const [cargoList, setCargoList] = useState<{ id: string; name: string; code: string; category: string }[]>([]);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
-  const [selectedCargoTypeId, setSelectedCargoTypeId] = useState<string>('');
+  const [taskList, setTaskList] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [selectedTaskTypeId, setSelectedTaskTypeId] = useState<string>('');
 
   // Filter available drivers (Ready or Menunggu Assignment)
   const availableDrivers = drivers.filter(
@@ -45,55 +41,32 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
 
     const loadMasters = async () => {
       try {
-        const [branchesRes, cargoRes] = await Promise.all([
-          fetch('/api/master/branches'),
-          fetch('/api/master/cargo-types'),
-        ]);
-
-        if (branchesRes.ok) {
-          const bJson = await branchesRes.json();
-          if (bJson.success && Array.isArray(bJson.data)) {
-            setBranchList(bJson.data);
-            if (!selectedBranchId && bJson.data.length > 0) {
-              const defaultBranch = preSelectedDriver 
-                ? bJson.data.find((b: any) => b.name === preSelectedDriver.branch) || bJson.data[0]
-                : bJson.data[0];
-              setBranch(defaultBranch.name);
-              setSelectedBranchId(defaultBranch.id);
-            }
-          }
-        }
-
-        if (cargoRes.ok) {
-          const cJson = await cargoRes.json();
-          if (cJson.success && Array.isArray(cJson.data)) {
-            setCargoList(cJson.data);
-            if (!selectedCargoTypeId && cJson.data.length > 0) {
-              setPackageType(cJson.data[0].name);
-              setSelectedCargoTypeId(cJson.data[0].id);
+        const taskRes = await fetch('/api/master/task-types');
+        if (taskRes.ok) {
+          const tJson = await taskRes.json();
+          if (tJson.success && Array.isArray(tJson.data)) {
+            setTaskList(tJson.data);
+            if (!selectedTaskTypeId && tJson.data.length > 0) {
+              setTaskType(tJson.data[0].name);
+              setSelectedTaskTypeId(tJson.data[0].id);
             }
           }
         }
       } catch (err) {
-        console.error('Failed loading master options:', err);
+        console.error('Failed loading task type master options:', err);
       }
     };
 
     loadMasters();
-  }, [isOpen, preSelectedDriver, selectedBranchId, selectedCargoTypeId]);
+  }, [isOpen, selectedTaskTypeId]);
 
   useEffect(() => {
     if (preSelectedDriver) {
       setAssignedDriverId(preSelectedDriver.id);
-      setBranch(preSelectedDriver.branch);
-      if (branchList.length > 0) {
-        const match = branchList.find((b) => b.name === preSelectedDriver.branch);
-        if (match) setSelectedBranchId(match.id);
-      }
     } else {
       setAssignedDriverId('');
     }
-  }, [preSelectedDriver, isOpen, branchList]);
+  }, [preSelectedDriver, isOpen]);
 
   if (!isOpen) return null;
 
@@ -113,17 +86,15 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
       customer,
       pickupLocation,
       dropoffLocation,
-      branch,
       status: assignedDriver ? ('Diterima' as OrderStatus) : ('Belum Ditugaskan' as OrderStatus),
       assignedDriverId: assignedDriver?.id,
       assignedDriverName: assignedDriver?.name,
       createdAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
       targetDeliveryTime: 'Dalam 2 Jam',
-      packageType,
+      taskType,
       priority,
       notes,
-      branchId: selectedBranchId || undefined,
-      cargoTypeId: selectedCargoTypeId || undefined,
+      taskTypeId: selectedTaskTypeId || undefined,
     };
 
     onSaveOrder(newOrder);
@@ -210,66 +181,40 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
             </div>
           </div>
 
-          {/* Cabang & Jenis Paket */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
-                <span>Cabang Operasional</span>
-                <span className="text-[9px] text-emerald-600 font-mono">Master Branch</span>
-              </label>
-              <select
-                value={branch}
-                onChange={(e) => {
-                  const bName = e.target.value;
-                  setBranch(bName);
-                  const found = branchList.find((b) => b.name === bName);
-                  if (found) setSelectedBranchId(found.id);
-                }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-              >
-                {branchList.length > 0
-                  ? branchList.map((b) => (
-                      <option key={b.id} value={b.name}>
-                        {b.name} ({b.code})
-                      </option>
-                    ))
-                  : BRANCH_LIST.filter((b) => b !== 'Semua Cabang').map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
-                <span>Jenis Muatan / Paket</span>
-                <span className="text-[9px] text-orange-600 font-mono">Master Cargo</span>
-              </label>
-              <select
-                value={packageType}
-                onChange={(e) => {
-                  const cName = e.target.value;
-                  setPackageType(cName);
-                  const found = cargoList.find((c) => c.name === cName);
-                  if (found) setSelectedCargoTypeId(found.id);
-                }}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-              >
-                {cargoList.length > 0
-                  ? cargoList.map((c) => (
-                      <option key={c.id} value={c.name}>
-                        {c.name} [{c.category}]
-                      </option>
-                    ))
-                  : (
+          {/* Jenis Tugas */}
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <ClipboardCheck className="w-3.5 h-3.5 text-blue-600" />
+                Jenis Tugas
+              </span>
+              <span className="text-[10px] text-blue-600 font-mono">Master Tugas</span>
+            </label>
+            <select
+              value={taskType}
+              onChange={(e) => {
+                const tName = e.target.value;
+                setTaskType(tName);
+                const found = taskList.find((t) => t.name === tName);
+                if (found) setSelectedTaskTypeId(found.id);
+              }}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+            >
+              {taskList.length > 0
+                ? taskList.map((t) => (
+                    <option key={t.id} value={t.name}>
+                      {t.name}
+                    </option>
+                  ))
+                : (
                     <>
-                      <option value="Paket Reguler (Kardus/Box)">Paket Reguler (Kardus/Box)</option>
-                      <option value="Dokumen & Surat Berharga">Dokumen & Surat Berharga</option>
-                      <option value="Elektronik & Barang Pecah Belah">Elektronik & Barang Pecah Belah</option>
-                      <option value="Makanan & Minuman Segar">Makanan & Minuman Segar</option>
-                      <option value="Farmasi & Sampel Medis">Farmasi & Sampel Medis</option>
+                      <option value="Replace">Replace</option>
+                      <option value="Short Term">Short Term</option>
+                      <option value="Antar Short Term">Antar Short Term</option>
+                      <option value="Tarik Short Term">Tarik Short Term</option>
                     </>
                   )}
-              </select>
-            </div>
+            </select>
           </div>
 
           {/* Prioritas & Driver Assignment */}
@@ -284,7 +229,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                     type="button"
                     key={p}
                     onClick={() => setPriority(p)}
-                    className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                    className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                       priority === p
                         ? p === 'Urgent' 
                           ? 'bg-rose-50 text-rose-700 border-rose-300' 
@@ -315,7 +260,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                 <option value="">-- Simpan sebagai Belum Ditugaskan --</option>
                 {availableDrivers.map((d) => (
                   <option key={d.id} value={d.id}>
-                    {d.name} ({d.status} • {d.vehicleType.split(' ')[0]})
+                    {d.name} ({d.status} • {d.simType})
                   </option>
                 ))}
               </select>
@@ -329,7 +274,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
             </label>
             <textarea
               rows={2}
-              placeholder="Instruksi khusus penanganan muatan atau kontak penerima..."
+              placeholder="Instruksi khusus penugasan armada atau kontak customer..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white resize-none transition-colors"
@@ -341,13 +286,13 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95 cursor-pointer"
             >
               Simpan & Terbitkan Order
             </button>

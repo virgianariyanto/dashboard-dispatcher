@@ -223,12 +223,10 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                             <span>{driver.name}</span>
                             <span className="text-[10px] text-slate-400 font-mono font-normal">({driver.id})</span>
                           </div>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                            <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px] text-slate-700 font-mono">
-                              {driver.plateNumber}
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              {driver.simType}
                             </span>
-                            <span>•</span>
-                            <span className="text-slate-600">{driver.branch}</span>
                           </div>
                           {driver.notes && (
                             <p className="text-[10px] text-slate-400 line-clamp-1 italic mt-0.5">
