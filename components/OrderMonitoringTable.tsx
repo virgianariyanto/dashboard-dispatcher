@@ -164,7 +164,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
             </span>
           </div>
           <p className="text-xs text-slate-500">
-            Kelola alur penugasan dari order masuk, pengiriman di jalan, hingga verifikasi selesai terkirim (PostgreSQL 18).
+            Kelola alur penugasan dari order masuk, pengiriman di jalan, hingga verifikasi selesai terkirim.
           </p>
         </div>
 

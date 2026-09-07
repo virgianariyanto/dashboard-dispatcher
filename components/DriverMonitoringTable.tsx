@@ -380,8 +380,8 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
           <span className="inline-block w-2 h-2 rounded-full bg-blue-600" />
           <span>Tips: Klik label status untuk ganti status dinas, atau klik tombol Pensil untuk edit profil driver lengkap.</span>
         </div>
-        <div className="text-slate-500 font-mono">
-          PostgreSQL Database Sync Active
+        <div className="text-slate-400 font-medium text-[11px]">
+          Live Data Sync Active
         </div>
       </div>
 

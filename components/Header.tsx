@@ -131,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onRefresh}
                 disabled={isSyncing}
-                title="Sinkronkan data dengan PostgreSQL"
+                title="Sinkronkan data"
                 className="p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all text-xs shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />

@@ -226,7 +226,7 @@ export const MasterStatusView: React.FC = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-500">
-                    Memuat data master status dari PostgreSQL...
+                    Memuat data master status...
                   </td>
                 </tr>
               ) : statuses.length === 0 ? (

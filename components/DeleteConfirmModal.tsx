@@ -45,7 +45,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         {/* Content */}
         <div className="p-5 space-y-3.5 text-xs text-slate-600">
           <p>
-            Apakah Anda yakin ingin menghapus data driver <strong className="text-slate-900">{driver.name}</strong> ({driver.id}) dari database PostgreSQL?
+            Apakah Anda yakin ingin menghapus data driver <strong className="text-slate-900">{driver.name}</strong> ({driver.id}) dari database?
           </p>
 
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">

@@ -216,7 +216,7 @@ export const MasterCargoTypesView: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500">
-            Tabel referensi jenis muatan yang terhubung langsung ke kolom <code className="text-orange-600 font-mono">cargoTypeId</code> pada setiap pesanan pengiriman (PostgreSQL 18).
+            Tabel referensi jenis muatan yang terhubung langsung ke kolom <code className="text-orange-600 font-mono">cargoTypeId</code> pada setiap pesanan pengiriman.
           </p>
         </div>
 
@@ -327,7 +327,7 @@ export const MasterCargoTypesView: React.FC = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                    Memuat data master jenis muatan dari PostgreSQL...
+                    Memuat data master jenis muatan...
                   </td>
                 </tr>
               ) : filteredCargoTypes.length === 0 ? (

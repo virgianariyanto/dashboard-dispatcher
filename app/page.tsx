@@ -61,7 +61,7 @@ export default function DispatcherDashboardPage() {
     },
     'master-status': {
       title: 'Master Status Driver',
-      subtitle: 'Data referensi status ketersediaan driver di database PostgreSQL',
+      subtitle: 'Data referensi status ketersediaan personil driver armada',
       category: 'Master Data',
     },
     'master-vehicles': {
@@ -717,13 +717,8 @@ export default function DispatcherDashboardPage() {
                 Dashboard Monitoring Driver &amp; Dispatcher Engine
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-500">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                PostgreSQL 18 Connected
-              </span>
-              <span>•</span>
-              <span>Master Data Relasional Aktif</span>
+            <div className="text-[11px] text-slate-400 font-medium">
+              Fleet Management &amp; Real-time Delivery Operations
             </div>
           </div>
         </footer>

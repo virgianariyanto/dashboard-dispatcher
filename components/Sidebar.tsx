@@ -7,7 +7,6 @@ import {
   Tag, 
   Car, 
   Building2, 
-  Database, 
   ChevronRight,
   ShieldCheck, 
   Package, 
@@ -132,11 +131,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Section 2: Master Data (Terhubung ke Driver) */}
         <div>
-          <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+          <div className="px-3 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             <span>Master Data</span>
-            <span className="text-[9px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-              PostgreSQL
-            </span>
           </div>
           <nav className="space-y-1">
             {/* Master Status Driver */}
@@ -240,22 +236,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
-        </div>
-
-        {/* Database Connection Status */}
-        <div className="p-2 rounded-xl bg-white/90 border border-slate-200 flex items-center gap-2.5 shadow-xs">
-          <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0 border border-emerald-100">
-            <Database className="w-3.5 h-3.5" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-[10px] font-bold text-slate-800 flex items-center gap-1.5">
-              <span>PostgreSQL 18</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-[9px] text-slate-500 truncate font-mono">
-              dashboard_dispatcher
-            </p>
-          </div>
         </div>
       </div>
 

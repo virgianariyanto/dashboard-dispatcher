@@ -186,7 +186,7 @@ export const MasterVehiclesView: React.FC = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-500">
-                    Memuat data kendaraan dari PostgreSQL...
+                    Memuat data kendaraan...
                   </td>
                 </tr>
               ) : vehicles.length === 0 ? (

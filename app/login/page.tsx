@@ -11,8 +11,7 @@ import {
   ArrowRight, 
   ShieldCheck, 
   AlertCircle, 
-  CheckCircle2, 
-  Database
+  CheckCircle2
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -208,12 +207,9 @@ export default function LoginPage() {
 
         {/* Footer Info */}
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Terhubung ke PostgreSQL 18</span>
-            <span>•</span>
-            <span>Single Role Admin Mode</span>
-          </div>
+          <p className="text-[11px] text-slate-400 font-medium">
+            Dispatcher Operations &amp; Fleet Monitoring System
+          </p>
         </div>
 
       </div>

@@ -183,7 +183,7 @@ export const MasterBranchesView: React.FC = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-500">
-                    Memuat data cabang dari PostgreSQL...
+                    Memuat data cabang...
                   </td>
                 </tr>
               ) : branches.length === 0 ? (
