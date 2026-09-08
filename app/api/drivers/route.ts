@@ -8,6 +8,7 @@ export async function GET() {
       include: {
         simTypeObj: true,
         driverStatusObj: true,
+        branchObj: true,
         taskHistories: {
           orderBy: {
             createdAt: 'desc',
@@ -22,6 +23,8 @@ export async function GET() {
     const formatted = drivers.map((d) => ({
       ...d,
       simType: d.simTypeObj?.name || d.simType,
+      branchName: d.branchObj?.name || null,
+      branchCode: d.branchObj?.code || null,
       taskHistory: d.taskHistories,
     }));
 
@@ -41,12 +44,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       name,
+      nik,
       phone,
       simType,
       status,
       startTime,
       endTime,
       notes,
+      branchId,
     } = body;
 
     if (!name) {
@@ -89,6 +94,7 @@ export async function POST(request: Request) {
     const newDriver = await prisma.driver.create({
       data: {
         id: generatedId,
+        nik: nik ? String(nik).trim() : null,
         name,
         avatarUrl,
         phone: phone || '-',
@@ -107,10 +113,12 @@ export async function POST(request: Request) {
         performanceScore: 90,
         statusId: resolvedStatusId || null,
         simTypeId: resolvedSimTypeId || null,
+        branchId: branchId || null,
       },
       include: {
         taskHistories: true,
         simTypeObj: true,
+        branchObj: true,
       },
     });
 
@@ -118,6 +126,9 @@ export async function POST(request: Request) {
       success: true,
       data: {
         ...newDriver,
+        simType: newDriver.simTypeObj?.name || newDriver.simType,
+        branchName: newDriver.branchObj?.name || null,
+        branchCode: newDriver.branchObj?.code || null,
         taskHistory: [],
       },
     });
@@ -137,12 +148,14 @@ export async function PUT(request: Request) {
     const {
       id,
       name,
+      nik,
       phone,
       simType,
       status,
       startTime,
       endTime,
       notes,
+      branchId,
     } = body;
 
     if (!id) {
@@ -174,6 +187,7 @@ export async function PUT(request: Request) {
       data: {
         name,
         phone,
+        ...(nik !== undefined ? { nik: nik ? String(nik).trim() : null } : {}),
         simType: simType || 'SIM A',
         status,
         startTime,
@@ -181,6 +195,7 @@ export async function PUT(request: Request) {
         notes,
         ...(resolvedStatusId ? { statusId: resolvedStatusId } : {}),
         ...(resolvedSimTypeId ? { simTypeId: resolvedSimTypeId } : {}),
+        ...(branchId !== undefined ? { branchId: branchId || null } : {}),
       },
       include: {
         taskHistories: {
@@ -189,6 +204,7 @@ export async function PUT(request: Request) {
           },
         },
         simTypeObj: true,
+        branchObj: true,
       },
     });
 
@@ -197,6 +213,8 @@ export async function PUT(request: Request) {
       data: {
         ...updated,
         simType: updated.simTypeObj?.name || updated.simType,
+        branchName: updated.branchObj?.name || null,
+        branchCode: updated.branchObj?.code || null,
         taskHistory: updated.taskHistories,
       },
     });

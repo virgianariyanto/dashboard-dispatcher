@@ -11,6 +11,7 @@ import {
   Package, 
   ClipboardList,
   ClipboardCheck,
+  Building2,
   LogOut
 } from 'lucide-react';
 
@@ -20,7 +21,8 @@ export type NavigationTab =
   | 'orders' 
   | 'master-status' 
   | 'master-sim-types' 
-  | 'master-task-types';
+  | 'master-task-types'
+  | 'master-branches';
 
 interface SidebarProps {
   activeTab: NavigationTab;
@@ -180,6 +182,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <span>Master Tugas</span>
               </div>
               {activeTab === 'master-task-types' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
+            </button>
+
+            {/* Master Cabang (Branch) */}
+            <button
+              onClick={() => onSelectTab('master-branches')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-medium transition-all text-left cursor-pointer ${
+                activeTab === 'master-branches'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Building2 className={`w-4 h-4 ${activeTab === 'master-branches' ? 'text-white' : 'text-indigo-600'}`} />
+                <span>Master Cabang</span>
+              </div>
+              {activeTab === 'master-branches' && <ChevronRight className="w-3.5 h-3.5 opacity-80" />}
             </button>
           </nav>
         </div>

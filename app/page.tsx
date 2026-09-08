@@ -20,6 +20,7 @@ import { Sidebar, NavigationTab } from '@/components/Sidebar';
 import { MasterStatusView } from '@/components/MasterStatusView';
 import { MasterSimTypesView } from '@/components/MasterSimTypesView';
 import { MasterTaskTypesView } from '@/components/MasterTaskTypesView';
+import { MasterBranchesView } from '@/components/MasterBranchesView';
 import { NewOrderModal } from '@/components/NewOrderModal';
 import { DriverHistoryModal } from '@/components/DriverHistoryModal';
 import { ExportModal } from '@/components/ExportModal';
@@ -70,6 +71,11 @@ export default function DispatcherDashboardPage() {
     'master-task-types': {
       title: 'Master Jenis Tugas',
       subtitle: 'Data referensi penugasan armada: Replace, Short Term, Antar & Tarik Short Term',
+      category: 'Master Data',
+    },
+    'master-branches': {
+      title: 'Master Cabang (Branch)',
+      subtitle: 'Data referensi cabang operasional armada, hub logistik & wilayah cakupan',
       category: 'Master Data',
     },
   };
@@ -140,7 +146,9 @@ export default function DispatcherDashboardPage() {
         searchQuery.trim() === '' ||
         driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         driver.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (driver.simType && driver.simType.toLowerCase().includes(searchQuery.toLowerCase()));
+        (driver.nik && driver.nik.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (driver.simType && driver.simType.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (driver.branchName && driver.branchName.toLowerCase().includes(searchQuery.toLowerCase()));
 
       return matchStatus && matchSearch;
     });
@@ -683,6 +691,11 @@ export default function DispatcherDashboardPage() {
           {/* TAB 5: Master Data Jenis Tugas (Terhubung ke Table Order) */}
           {activeTab === 'master-task-types' && (
             <MasterTaskTypesView />
+          )}
+
+          {/* TAB 6: Master Data Cabang (Terhubung ke Table Branch) */}
+          {activeTab === 'master-branches' && (
+            <MasterBranchesView />
           )}
 
         </main>

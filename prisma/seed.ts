@@ -73,6 +73,59 @@ const MASTER_TASK_TYPES = [
   },
 ];
 
+const MASTER_BRANCHES = [
+  {
+    code: 'CBG-JKT-01',
+    name: 'Cabang Jakarta Pusat (Hub Thamrin)',
+    city: 'Jakarta Pusat',
+    address: 'Jl. M.H. Thamrin No. 28-30, Gondangdia, Menteng',
+    phone: '021-3901234',
+    email: 'hub.thamrin@dispatcher.id',
+    managerName: 'Hendra Setiawan',
+    isActive: true,
+  },
+  {
+    code: 'CBG-JKT-02',
+    name: 'Cabang Jakarta Selatan (Hub TB Simatupang)',
+    city: 'Jakarta Selatan',
+    address: 'Jl. TB Simatupang No. 15, Cilandak Barat',
+    phone: '021-7590888',
+    email: 'hub.simatupang@dispatcher.id',
+    managerName: 'Rian Pratama',
+    isActive: true,
+  },
+  {
+    code: 'CBG-BDG-01',
+    name: 'Cabang Bandung Utama (Hub Pasteur)',
+    city: 'Bandung',
+    address: 'Jl. Dr. Djunjunan No. 143-149, Pajajaran, Cicendo',
+    phone: '022-2051234',
+    email: 'hub.bandung@dispatcher.id',
+    managerName: 'Budi Santoso',
+    isActive: true,
+  },
+  {
+    code: 'CBG-SBY-01',
+    name: 'Cabang Surabaya Timur (Hub Rungkut)',
+    city: 'Surabaya',
+    address: 'Kawasan Industri Rungkut Blok B-12, Surabaya',
+    phone: '031-8705678',
+    email: 'hub.surabaya@dispatcher.id',
+    managerName: 'Agus Triyono',
+    isActive: true,
+  },
+  {
+    code: 'CBG-SMG-01',
+    name: 'Cabang Semarang (Hub Pemuda)',
+    city: 'Semarang',
+    address: 'Jl. Pemuda No. 88, Sekayu, Semarang Tengah',
+    phone: '024-3549000',
+    email: 'hub.semarang@dispatcher.id',
+    managerName: 'Dewi Lestari',
+    isActive: true,
+  },
+];
+
 const SEED_ORDERS = [
   {
     id: 'ORD-1',
@@ -381,11 +434,13 @@ async function main() {
   for (const drv of INITIAL_DRIVERS) {
     const statusId = statusMap[drv.statusCode] || statusMap[drv.status];
     const simTypeId = simTypeMap[drv.simTypeCode] || simTypeMap[drv.simType];
+    const nik = (drv as { nik?: string }).nik || `317101${String(40 + Math.floor(Math.random() * 20))}059${drv.id.slice(-2)}0001`;
 
     await prisma.driver.upsert({
       where: { id: drv.id },
       update: {
         name: drv.name,
+        nik,
         avatarUrl: drv.avatarUrl,
         phone: drv.phone,
         simType: drv.simType,
@@ -407,6 +462,7 @@ async function main() {
       create: {
         id: drv.id,
         name: drv.name,
+        nik,
         avatarUrl: drv.avatarUrl,
         phone: drv.phone,
         simType: drv.simType,
@@ -442,6 +498,7 @@ async function main() {
         status: ord.status,
         assignedDriverId: ord.assignedDriverId || null,
         assignedDriverName: ord.assignedDriverName || null,
+        orderDate: new Date('2026-09-04T08:00:00Z'),
         targetDeliveryTime: ord.targetDeliveryTime,
         taskType: ord.taskType,
         priority: ord.priority,
@@ -457,6 +514,7 @@ async function main() {
         status: ord.status,
         assignedDriverId: ord.assignedDriverId || null,
         assignedDriverName: ord.assignedDriverName || null,
+        orderDate: new Date('2026-09-04T08:00:00Z'),
         targetDeliveryTime: ord.targetDeliveryTime,
         taskType: ord.taskType,
         priority: ord.priority,
@@ -482,7 +540,33 @@ async function main() {
     },
   });
 
-  console.log('✔ Master Data SIM Types, Drivers, Orders & Default Admin successfully seeded!');
+  // 6. Seed Master Branches
+  for (const b of MASTER_BRANCHES) {
+    await prisma.branch.upsert({
+      where: { code: b.code },
+      update: {
+        name: b.name,
+        city: b.city,
+        address: b.address,
+        phone: b.phone,
+        email: b.email,
+        managerName: b.managerName,
+        isActive: b.isActive,
+      },
+      create: {
+        code: b.code,
+        name: b.name,
+        city: b.city,
+        address: b.address,
+        phone: b.phone,
+        email: b.email,
+        managerName: b.managerName,
+        isActive: b.isActive,
+      },
+    });
+  }
+
+  console.log('✔ Master Data SIM Types, Branches, Drivers, Orders & Default Admin successfully seeded!');
 }
 
 main()

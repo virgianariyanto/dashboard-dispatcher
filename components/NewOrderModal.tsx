@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, MapPin, ClipboardCheck } from 'lucide-react';
+import { X, Plus, MapPin, ClipboardCheck, Calendar, Building2 } from 'lucide-react';
 import { Driver, Order, OrderStatus } from '@/types/dispatcher';
 
 interface NewOrderModalProps {
@@ -20,6 +20,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   onSaveOrder,
 }) => {
   const [customer, setCustomer] = useState('');
+  const [orderDate, setOrderDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropoffLocation, setDropoffLocation] = useState('');
   const [taskType, setTaskType] = useState('Replace');
@@ -30,6 +31,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   // Master options from PostgreSQL
   const [taskList, setTaskList] = useState<{ id: string; name: string; code: string }[]>([]);
   const [selectedTaskTypeId, setSelectedTaskTypeId] = useState<string>('');
+  const [branchList, setBranchList] = useState<{ id: string; name: string; code: string; city: string }[]>([]);
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
 
   // Filter available drivers (Ready or Menunggu Assignment)
   const availableDrivers = drivers.filter(
@@ -41,7 +44,11 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
 
     const loadMasters = async () => {
       try {
-        const taskRes = await fetch('/api/master/task-types');
+        const [taskRes, branchRes] = await Promise.all([
+          fetch('/api/master/task-types'),
+          fetch('/api/master/branches'),
+        ]);
+
         if (taskRes.ok) {
           const tJson = await taskRes.json();
           if (tJson.success && Array.isArray(tJson.data)) {
@@ -52,8 +59,15 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
             }
           }
         }
+
+        if (branchRes.ok) {
+          const bJson = await branchRes.json();
+          if (bJson.success && Array.isArray(bJson.data)) {
+            setBranchList(bJson.data);
+          }
+        }
       } catch (err) {
-        console.error('Failed loading task type master options:', err);
+        console.error('Failed loading master options:', err);
       }
     };
 
@@ -80,6 +94,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
     const assignedDriver = drivers.find((d) => d.id === assignedDriverId);
     const orderNum = `ORD-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${Math.floor(100 + Math.random() * 900)}`;
 
+    const selectedBranch = branchList.find((b) => b.id === selectedBranchId);
+
     const newOrder: Order = {
       id: `ORD-${Date.now()}`,
       orderNumber: orderNum,
@@ -90,11 +106,14 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
       assignedDriverId: assignedDriver?.id,
       assignedDriverName: assignedDriver?.name,
       createdAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      orderDate: orderDate || new Date().toISOString().split('T')[0],
       targetDeliveryTime: 'Dalam 2 Jam',
       taskType,
       priority,
       notes,
       taskTypeId: selectedTaskTypeId || undefined,
+      branchId: selectedBranchId || undefined,
+      branchName: selectedBranch?.name || undefined,
     };
 
     onSaveOrder(newOrder);
@@ -102,10 +121,12 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
 
     // Reset form
     setCustomer('');
+    setOrderDate(new Date().toISOString().split('T')[0]);
     setPickupLocation('');
     setDropoffLocation('');
     setNotes('');
     setAssignedDriverId('');
+    setSelectedBranchId('');
   };
 
   return (
@@ -125,7 +146,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -134,19 +155,34 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs text-slate-700">
           
-          {/* Customer / Pengirim */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
-              Customer / Merchant Pengirim *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Contoh: PT Surya Logistik / Toko Makmur"
-              value={customer}
-              onChange={(e) => setCustomer(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-            />
+          {/* Customer / Pengirim & Tanggal Order */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
+                Customer / Merchant Pengirim *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Contoh: PT Surya Logistik"
+                value={customer}
+                onChange={(e) => setCustomer(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                Tanggal Order (Order Date) *
+              </label>
+              <input
+                type="date"
+                required
+                value={orderDate}
+                onChange={(e) => setOrderDate(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+              />
+            </div>
           </div>
 
           {/* Lokasi Pickup & Dropoff */}
@@ -181,40 +217,64 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
             </div>
           </div>
 
-          {/* Jenis Tugas */}
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <ClipboardCheck className="w-3.5 h-3.5 text-blue-600" />
-                Jenis Tugas
-              </span>
-              <span className="text-[10px] text-blue-600 font-mono">Master Tugas</span>
-            </label>
-            <select
-              value={taskType}
-              onChange={(e) => {
-                const tName = e.target.value;
-                setTaskType(tName);
-                const found = taskList.find((t) => t.name === tName);
-                if (found) setSelectedTaskTypeId(found.id);
-              }}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-            >
-              {taskList.length > 0
-                ? taskList.map((t) => (
-                    <option key={t.id} value={t.name}>
-                      {t.name}
-                    </option>
-                  ))
-                : (
-                    <>
-                      <option value="Replace">Replace</option>
-                      <option value="Short Term">Short Term</option>
-                      <option value="Antar Short Term">Antar Short Term</option>
-                      <option value="Tarik Short Term">Tarik Short Term</option>
-                    </>
-                  )}
-            </select>
+          {/* Jenis Tugas & Pilihan Cabang */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <ClipboardCheck className="w-3.5 h-3.5 text-blue-600" />
+                  Jenis Tugas
+                </span>
+                <span className="text-[10px] text-blue-600 font-mono">Master Tugas</span>
+              </label>
+              <select
+                value={taskType}
+                onChange={(e) => {
+                  const tName = e.target.value;
+                  setTaskType(tName);
+                  const found = taskList.find((t) => t.name === tName);
+                  if (found) setSelectedTaskTypeId(found.id);
+                }}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+              >
+                {taskList.length > 0
+                  ? taskList.map((t) => (
+                      <option key={t.id} value={t.name}>
+                        {t.name}
+                      </option>
+                    ))
+                  : (
+                      <>
+                        <option value="Replace">Replace</option>
+                        <option value="Short Term">Short Term</option>
+                        <option value="Antar Short Term">Antar Short Term</option>
+                        <option value="Tarik Short Term">Tarik Short Term</option>
+                      </>
+                    )}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+                  Cabang
+                </span>
+                <span className="text-[10px] text-indigo-600 font-mono">Master Cabang</span>
+              </label>
+              <select
+                value={selectedBranchId}
+                onChange={(e) => setSelectedBranchId(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-indigo-600 focus:bg-white transition-colors"
+              >
+                <option value="">-- Pilih Cabang (Opsional) --</option>
+                {branchList.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.code} - {b.name} ({b.city})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Prioritas & Driver Assignment */}

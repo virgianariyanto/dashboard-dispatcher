@@ -28,11 +28,14 @@ export interface TaskHistoryItem {
 
 export interface Driver {
   id: string;
+  nik?: string;
   name: string;
   avatarUrl: string;
   phone: string;
   simType: string;
   simTypeId?: string;
+  branchId?: string;
+  branchName?: string;
   status: DriverStatus;
   startTime: string;
   endTime: string;
@@ -58,11 +61,14 @@ export interface Order {
   assignedDriverId?: string;
   assignedDriverName?: string;
   createdAt: string;
+  orderDate?: string;
   targetDeliveryTime: string;
   taskType: string;
   priority: 'Normal' | 'Tinggi' | 'Urgent';
   notes?: string;
   taskTypeId?: string;
+  branchId?: string;
+  branchName?: string;
 }
 
 export interface FilterState {
@@ -86,6 +92,22 @@ export interface TaskTypeItem {
   name: string;
   description?: string;
   orderCount?: number;
+}
+
+export interface BranchItem {
+  id: string;
+  code: string;
+  name: string;
+  city: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  managerName?: string;
+  isActive: boolean;
+  driverCount?: number;
+  orderCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface KPIData {

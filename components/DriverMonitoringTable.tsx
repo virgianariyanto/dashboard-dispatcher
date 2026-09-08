@@ -12,7 +12,8 @@ import {
   UserPlus,
   Edit,
   Trash2,
-  User
+  User,
+  Building2
 } from 'lucide-react';
 import { Driver, DriverStatus } from '@/types/dispatcher';
 
@@ -125,7 +126,7 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Cari nama driver / ID..."
+              placeholder="Cari nama driver / NIK..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="w-full bg-slate-50 text-slate-900 pl-9 pr-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-colors placeholder:text-slate-400"
@@ -174,6 +175,7 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
           <thead>
             <tr className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
               <th className="py-3.5 px-4">Driver</th>
+              <th className="py-3.5 px-3">NIK</th>
               <th className="py-3.5 px-3">Status</th>
               <th className="py-3.5 px-3">Jam Kerja</th>
               <th className="py-3.5 px-3 text-center">Tugas</th>
@@ -197,6 +199,9 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                         <div className="h-2.5 w-16 bg-slate-100 rounded" />
                       </div>
                     </div>
+                  </td>
+                  <td className="py-3 px-3">
+                    <div className="h-4 w-24 bg-slate-200 rounded" />
                   </td>
                   <td className="py-3 px-4">
                     <div className="h-6 w-20 bg-slate-200 rounded-full" />
@@ -229,7 +234,7 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
               ))
             ) : drivers.length === 0 ? (
               <tr>
-                <td colSpan={10} className="py-8 text-center text-slate-500 text-sm">
+                <td colSpan={11} className="py-8 text-center text-slate-500 text-sm">
                   Tidak ada data driver yang sesuai dengan kriteria filter.
                 </td>
               </tr>
@@ -261,14 +266,19 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                           />
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                          <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                             <span>{driver.name}</span>
-                            <span className="text-[10px] text-slate-400 font-mono font-normal">({driver.id})</span>
                           </div>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 flex-wrap">
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                               {driver.simType}
                             </span>
+                            {driver.branchName && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200" title="Cabang Hub Armada">
+                                <Building2 className="w-3 h-3 text-indigo-500" />
+                                {driver.branchName}
+                              </span>
+                            )}
                           </div>
                           {driver.notes && (
                             <p className="text-[10px] text-slate-400 line-clamp-1 italic mt-0.5">
@@ -279,7 +289,18 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                       </div>
                     </td>
 
-                    {/* Kolom 2: Status Driver */}
+                    {/* Kolom 2: NIK */}
+                    <td className="py-3 px-3 font-mono text-slate-700 whitespace-nowrap">
+                      {driver.nik ? (
+                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[11px] font-semibold text-slate-800 border border-slate-200">
+                          {driver.nik}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 italic text-[11px]">-</span>
+                      )}
+                    </td>
+
+                    {/* Kolom 3: Status Driver */}
                     <td className="py-3 px-3">
                       <div className="relative inline-block">
                         <button

@@ -45,6 +45,7 @@ model TaskType {
 
 model Driver {
   id               String         @id
+  nik              String?
   name             String
   avatarUrl        String
   phone            String
@@ -66,12 +67,31 @@ model Driver {
 
   statusId         String?
   simTypeId        String?
+  branchId         String?
 
   driverStatusObj  DriverStatus?  @relation(fields: [statusId], references: [id], onDelete: SetNull)
   simTypeObj       SimType?       @relation(fields: [simTypeId], references: [id], onDelete: SetNull)
+  branchObj        Branch?        @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
   orders           Order[]
   taskHistories    TaskHistory[]
+}
+
+model Branch {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  city        String
+  address     String?
+  phone       String?
+  email       String?
+  managerName String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  drivers     Driver[]
+  orders      Order[]
 }
 
 model Order {
@@ -84,14 +104,17 @@ model Order {
   assignedDriverId   String?
   assignedDriverName String?
   createdAt          DateTime   @default(now())
+  orderDate          DateTime   @default(now())
   targetDeliveryTime String     @default("Dalam 2 Jam")
   taskType           String     @default("Replace")
   priority           String     @default("Normal")
   notes              String?
   taskTypeId         String?
+  branchId           String?
 
   driver             Driver?    @relation(fields: [assignedDriverId], references: [id], onDelete: SetNull)
   taskTypeObj        TaskType?  @relation(fields: [taskTypeId], references: [id], onDelete: SetNull)
+  branchObj          Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
 }
 
 model TaskHistory {

@@ -7,6 +7,7 @@ export async function GET() {
     const orders = await prisma.order.findMany({
       include: {
         taskTypeObj: true,
+        branchObj: true,
         driver: {
           select: {
             id: true,
@@ -24,6 +25,11 @@ export async function GET() {
     const formatted = orders.map((o) => ({
       ...o,
       taskType: o.taskTypeObj?.name || o.taskType,
+      branchName: o.branchObj?.name || null,
+      branchCode: o.branchObj?.code || null,
+      orderDate: o.orderDate
+        ? new Date(o.orderDate).toISOString().split('T')[0]
+        : new Date(o.createdAt).toISOString().split('T')[0],
       createdAt: new Date(o.createdAt).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
@@ -57,8 +63,10 @@ export async function POST(request: Request) {
       packageType,
       priority,
       notes,
+      orderDate,
       taskTypeId: rawTaskTypeId,
       cargoTypeId,
+      branchId,
     } = body;
 
     const taskType = rawTaskType || packageType || 'Replace';
@@ -88,7 +96,13 @@ export async function POST(request: Request) {
           taskType,
           priority: priority || 'Normal',
           notes: notes || null,
+          orderDate: orderDate ? new Date(orderDate) : new Date(),
           taskTypeId: resolvedTaskTypeId || null,
+          branchId: branchId || null,
+        },
+        include: {
+          taskTypeObj: true,
+          branchObj: true,
         },
       });
 
@@ -127,7 +141,20 @@ export async function POST(request: Request) {
       return newOrder;
     });
 
-    return NextResponse.json({ success: true, data: result });
+    const formattedResult = {
+      ...result,
+      taskType: (result as any).taskTypeObj?.name || result.taskType,
+      branchName: (result as any).branchObj?.name || null,
+      orderDate: (result as any).orderDate
+        ? new Date((result as any).orderDate).toISOString().split('T')[0]
+        : new Date(result.createdAt).toISOString().split('T')[0],
+      createdAt: new Date(result.createdAt).toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    };
+
+    return NextResponse.json({ success: true, data: formattedResult });
   } catch (error) {
     console.error('Error creating order in PostgreSQL:', error);
     return NextResponse.json(
