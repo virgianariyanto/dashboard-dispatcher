@@ -16,7 +16,9 @@ import {
   ClipboardCheck, 
   UserPlus, 
   AlertTriangle,
-  Trash2
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Order, Driver, OrderStatus } from '@/types/dispatcher';
 
@@ -42,6 +44,13 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('Semua');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Reset to page 1 when filter/search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   // Filtered Orders
   const filteredOrders = useMemo(() => {
@@ -65,6 +74,27 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
       return matchStatus && matchSearch;
     });
   }, [orders, statusFilter, searchQuery]);
+
+  // Pagination calculation
+  const totalItems = filteredOrders.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = totalItems === 0 ? 0 : (safeCurrentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+
+  const getPaginationRange = (current: number, total: number) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    if (current <= 3) {
+      return [1, 2, 3, 4, '...', total];
+    }
+    if (current >= total - 2) {
+      return [1, '...', total - 3, total - 2, total - 1, total];
+    }
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  };
 
   // Statistics
   const stats = useMemo(() => {
@@ -306,7 +336,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((ord) => {
+                paginatedOrders.map((ord) => {
                   const isUnassigned = ord.status === 'Belum Ditugaskan' || !ord.assignedDriverId;
                   const isWalking = ord.status === 'Berjalan' || ord.status === 'Diterima';
                   const isCompleted = ord.status === 'Selesai';
@@ -476,6 +506,85 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="p-3 sm:px-5 border-t border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-600">
+          <div className="flex items-center gap-3">
+            <span className="text-slate-500">
+              {totalItems === 0 ? (
+                '0 order'
+              ) : (
+                <>
+                  Menampilkan <strong className="font-semibold text-slate-800">{startIndex + 1}</strong> - <strong className="font-semibold text-slate-800">{endIndex}</strong> dari <strong className="font-semibold text-slate-800">{totalItems}</strong> order
+                </>
+              )}
+            </span>
+            <div className="flex items-center gap-1.5 pl-3 border-l border-slate-200">
+              <span className="text-slate-400 text-[11px]">Baris:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-slate-50 border border-slate-300 rounded px-2 py-0.5 text-xs text-slate-700 focus:outline-none focus:border-blue-600 cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Navigation Buttons */}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1 self-center sm:self-auto">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safeCurrentPage === 1}
+                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                title="Halaman Sebelumnya"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              {getPaginationRange(safeCurrentPage, totalPages).map((item, idx) => {
+                if (item === '...') {
+                  return (
+                    <span key={`ellipsis-${idx}`} className="px-1.5 text-slate-400 text-xs">
+                      ...
+                    </span>
+                  );
+                }
+                const pageNum = item as number;
+                const isActive = pageNum === safeCurrentPage;
+                return (
+                  <button
+                    key={`page-${pageNum}`}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`min-w-[28px] h-7 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safeCurrentPage === totalPages}
+                className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                title="Halaman Berikutnya"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
