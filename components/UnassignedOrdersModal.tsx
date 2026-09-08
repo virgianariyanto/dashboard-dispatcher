@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import { X, AlertCircle, UserCheck, MapPin, Clock, Tag } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, AlertCircle, UserCheck, MapPin, Clock, Tag, MessageSquare } from 'lucide-react';
 import { Order, Driver } from '@/types/dispatcher';
+import { openWhatsAppNotification } from '@/lib/whatsapp';
 
 interface UnassignedOrdersModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ export const UnassignedOrdersModal: React.FC<UnassignedOrdersModalProps> = ({
   availableDrivers,
   onAssignOrderToDriver,
 }) => {
+  const [notifyWhatsApp, setNotifyWhatsApp] = useState<boolean>(true);
+
   if (!isOpen) return null;
 
   return (
@@ -99,7 +102,20 @@ export const UnassignedOrdersModal: React.FC<UnassignedOrdersModalProps> = ({
                     Jenis Tugas: <span className="text-slate-800 font-medium">{order.taskType}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex items-center gap-1.5 text-[11px] text-slate-600 cursor-pointer select-none bg-emerald-50/80 hover:bg-emerald-100/80 px-2 py-1 rounded-md border border-emerald-200 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={notifyWhatsApp}
+                        onChange={(e) => setNotifyWhatsApp(e.target.checked)}
+                        className="w-3.5 h-3.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <span className="flex items-center gap-1 font-semibold text-emerald-800 text-[10px]">
+                        <MessageSquare className="w-3 h-3 text-emerald-600" />
+                        Kirim WA ke Driver
+                      </span>
+                    </label>
+
                     <select
                       id={`driver-select-${order.id}`}
                       className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 text-xs focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
@@ -119,9 +135,13 @@ export const UnassignedOrdersModal: React.FC<UnassignedOrdersModalProps> = ({
                           alert('Silakan pilih driver standby terlebih dahulu.');
                           return;
                         }
+                        const selectedDriver = availableDrivers.find((d) => d.id === selectEl.value);
                         onAssignOrderToDriver(order.id, selectEl.value);
+                        if (notifyWhatsApp && selectedDriver) {
+                          openWhatsAppNotification(order, selectedDriver);
+                        }
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
                       <span>Tugaskan</span>

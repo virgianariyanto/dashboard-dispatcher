@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, MapPin, ClipboardCheck, Calendar, Building2 } from 'lucide-react';
+import { X, Plus, MapPin, ClipboardCheck, Calendar, Building2, MessageSquare } from 'lucide-react';
 import { Driver, Order, OrderStatus } from '@/types/dispatcher';
+import { openWhatsAppNotification } from '@/lib/whatsapp';
 
 interface NewOrderModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   const [priority, setPriority] = useState<'Normal' | 'Tinggi' | 'Urgent'>('Normal');
   const [assignedDriverId, setAssignedDriverId] = useState('');
   const [notes, setNotes] = useState('');
+  const [notifyWhatsApp, setNotifyWhatsApp] = useState<boolean>(true);
 
   // Master options from PostgreSQL
   const [taskList, setTaskList] = useState<{ id: string; name: string; code: string }[]>([]);
@@ -119,6 +121,11 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
     };
 
     onSaveOrder(newOrder);
+
+    if (notifyWhatsApp && assignedDriver) {
+      openWhatsAppNotification(newOrder, assignedDriver);
+    }
+
     onClose();
 
     // Reset form
@@ -342,6 +349,21 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
                   </option>
                 ))}
               </select>
+
+              {assignedDriverId && (
+                <label className="flex items-center gap-2 mt-2 text-xs text-slate-700 cursor-pointer select-none bg-emerald-50/80 hover:bg-emerald-100/80 p-2 rounded-lg border border-emerald-200 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={notifyWhatsApp}
+                    onChange={(e) => setNotifyWhatsApp(e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <span className="flex items-center gap-1.5 font-semibold text-emerald-800 text-[11px]">
+                    <MessageSquare className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    Buka WhatsApp & kirim rincian order ke Driver setelah disimpan
+                  </span>
+                </label>
+              )}
             </div>
           </div>
 

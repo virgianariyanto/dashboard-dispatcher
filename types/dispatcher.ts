@@ -60,6 +60,7 @@ export interface Order {
   status: OrderStatus;
   assignedDriverId?: string;
   assignedDriverName?: string;
+  driverPhone?: string;
   createdAt: string;
   startDate?: string;
   endDate?: string;

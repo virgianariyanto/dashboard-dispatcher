@@ -15,9 +15,11 @@ import {
   Edit,
   Trash2,
   User,
-  Building2
+  Building2,
+  MessageSquare
 } from 'lucide-react';
 import { Driver, DriverStatus } from '@/types/dispatcher';
+import { openWhatsAppChat } from '@/lib/whatsapp';
 
 interface DriverMonitoringTableProps {
   drivers: Driver[];
@@ -437,6 +439,17 @@ export const DriverMonitoringTable: React.FC<DriverMonitoringTableProps> = ({
                         >
                           <History className="w-3.5 h-3.5" />
                         </button>
+
+                        {/* Tombol Chat WhatsApp Driver */}
+                        {driver.phone && (
+                          <button
+                            onClick={() => openWhatsAppChat(driver.phone)}
+                            title={`Chat WhatsApp langsung ke ${driver.name} (${driver.phone})`}
+                            className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg transition-all cursor-pointer shadow-2xs"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                          </button>
+                        )}
 
                         {/* Tombol Edit Driver */}
                         <button

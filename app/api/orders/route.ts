@@ -27,6 +27,7 @@ export async function GET() {
       taskType: o.taskTypeObj?.name || o.taskType,
       branchName: o.branchObj?.name || null,
       branchCode: o.branchObj?.code || null,
+      driverPhone: o.driver?.phone || null,
       startDate: o.startDate
         ? new Date(o.startDate).toISOString().split('T')[0]
         : new Date(o.createdAt).toISOString().split('T')[0],
