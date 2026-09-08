@@ -172,7 +172,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold shadow-md shadow-blue-600/20 transition-all active:scale-95 shrink-0 cursor-pointer"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>+ Input Order Baru</span>
+          <span>Input Order Baru</span>
         </button>
       </div>
 
@@ -240,13 +240,13 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
             ))}
           </div>
 
-          <button
+          {/* <button
             onClick={onOpenNewOrder}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer shrink-0"
           >
             <PlusCircle className="w-3.5 h-3.5" />
-            <span>+ Tambah Order</span>
-          </button>
+            <span>Tambah Order</span>
+          </button> */}
         </div>
       </div>
 

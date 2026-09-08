@@ -150,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-md shadow-blue-600/25 transition-all active:scale-95 cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" />
-              <span>+ Order Baru</span>
+              <span>Order Baru</span>
             </button>
 
             {/* Separator & Admin Profile + Logout */}

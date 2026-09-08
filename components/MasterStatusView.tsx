@@ -203,7 +203,7 @@ export const MasterStatusView: React.FC = () => {
           className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-all active:scale-95 shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Tambah Status Baru</span>
+          <span>Tambah Status Baru</span>
         </button>
       </div>
 

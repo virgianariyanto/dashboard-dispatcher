@@ -228,7 +228,7 @@ export const MasterBranchesView: React.FC = () => {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold shadow-lg shadow-blue-600/20 transition-all active:scale-95 shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Tambah Cabang Baru</span>
+          <span>Tambah Cabang Baru</span>
         </button>
       </div>
 

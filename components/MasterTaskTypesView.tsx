@@ -174,7 +174,7 @@ export const MasterTaskTypesView: React.FC = () => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/20 transition-all active:scale-95 shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>+ Tambah Jenis Tugas</span>
+          <span>Tambah Jenis Tugas</span>
         </button>
       </div>
 
