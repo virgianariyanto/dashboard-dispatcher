@@ -61,7 +61,8 @@ export interface Order {
   assignedDriverId?: string;
   assignedDriverName?: string;
   createdAt: string;
-  orderDate?: string;
+  startDate?: string;
+  endDate?: string;
   targetDeliveryTime: string;
   taskType: string;
   priority: 'Normal' | 'Tinggi' | 'Urgent';

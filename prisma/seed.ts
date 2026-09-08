@@ -498,13 +498,14 @@ async function main() {
         status: ord.status,
         assignedDriverId: ord.assignedDriverId || null,
         assignedDriverName: ord.assignedDriverName || null,
-        orderDate: new Date('2026-09-04T08:00:00Z'),
+        startDate: new Date('2026-09-04T08:00:00Z'),
+        endDate: new Date('2026-09-05T18:00:00Z'),
         targetDeliveryTime: ord.targetDeliveryTime,
         taskType: ord.taskType,
         priority: ord.priority,
         notes: ord.notes || null,
         taskTypeId,
-      },
+      } as any,
       create: {
         id: ord.id,
         orderNumber: ord.orderNumber,
@@ -514,13 +515,14 @@ async function main() {
         status: ord.status,
         assignedDriverId: ord.assignedDriverId || null,
         assignedDriverName: ord.assignedDriverName || null,
-        orderDate: new Date('2026-09-04T08:00:00Z'),
+        startDate: new Date('2026-09-04T08:00:00Z'),
+        endDate: new Date('2026-09-05T18:00:00Z'),
         targetDeliveryTime: ord.targetDeliveryTime,
         taskType: ord.taskType,
         priority: ord.priority,
         notes: ord.notes || null,
         taskTypeId,
-      },
+      } as any,
     });
   }
 

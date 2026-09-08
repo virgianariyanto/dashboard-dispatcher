@@ -104,7 +104,8 @@ model Order {
   assignedDriverId   String?
   assignedDriverName String?
   createdAt          DateTime   @default(now())
-  orderDate          DateTime   @default(now())
+  startDate          DateTime   @default(now())
+  endDate            DateTime?
   targetDeliveryTime String     @default("Dalam 2 Jam")
   taskType           String     @default("Replace")
   priority           String     @default("Normal")

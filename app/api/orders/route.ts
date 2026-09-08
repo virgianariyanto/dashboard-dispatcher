@@ -22,14 +22,17 @@ export async function GET() {
       },
     });
 
-    const formatted = orders.map((o) => ({
+    const formatted = orders.map((o: any) => ({
       ...o,
       taskType: o.taskTypeObj?.name || o.taskType,
       branchName: o.branchObj?.name || null,
       branchCode: o.branchObj?.code || null,
-      orderDate: o.orderDate
-        ? new Date(o.orderDate).toISOString().split('T')[0]
+      startDate: o.startDate
+        ? new Date(o.startDate).toISOString().split('T')[0]
         : new Date(o.createdAt).toISOString().split('T')[0],
+      endDate: o.endDate
+        ? new Date(o.endDate).toISOString().split('T')[0]
+        : null,
       createdAt: new Date(o.createdAt).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',
@@ -63,7 +66,8 @@ export async function POST(request: Request) {
       packageType,
       priority,
       notes,
-      orderDate,
+      startDate,
+      endDate,
       taskTypeId: rawTaskTypeId,
       cargoTypeId,
       branchId,
@@ -96,10 +100,11 @@ export async function POST(request: Request) {
           taskType,
           priority: priority || 'Normal',
           notes: notes || null,
-          orderDate: orderDate ? new Date(orderDate) : new Date(),
+          startDate: startDate ? new Date(startDate) : new Date(),
+          endDate: endDate ? new Date(endDate) : null,
           taskTypeId: resolvedTaskTypeId || null,
           branchId: branchId || null,
-        },
+        } as any,
         include: {
           taskTypeObj: true,
           branchObj: true,
@@ -145,9 +150,12 @@ export async function POST(request: Request) {
       ...result,
       taskType: (result as any).taskTypeObj?.name || result.taskType,
       branchName: (result as any).branchObj?.name || null,
-      orderDate: (result as any).orderDate
-        ? new Date((result as any).orderDate).toISOString().split('T')[0]
+      startDate: (result as any).startDate
+        ? new Date((result as any).startDate).toISOString().split('T')[0]
         : new Date(result.createdAt).toISOString().split('T')[0],
+      endDate: (result as any).endDate
+        ? new Date((result as any).endDate).toISOString().split('T')[0]
+        : null,
       createdAt: new Date(result.createdAt).toLocaleTimeString('id-ID', {
         hour: '2-digit',
         minute: '2-digit',

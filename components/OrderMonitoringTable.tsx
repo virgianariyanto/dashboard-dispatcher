@@ -64,7 +64,8 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
         q === '' ||
         order.orderNumber.toLowerCase().includes(q) ||
         order.customer.toLowerCase().includes(q) ||
-        (order.orderDate && order.orderDate.toLowerCase().includes(q)) ||
+        (order.startDate && order.startDate.toLowerCase().includes(q)) ||
+        (order.endDate && order.endDate.toLowerCase().includes(q)) ||
         order.pickupLocation.toLowerCase().includes(q) ||
         order.dropoffLocation.toLowerCase().includes(q) ||
         (order.branchName && order.branchName.toLowerCase().includes(q)) ||
@@ -372,11 +373,17 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono mt-0.5 flex-wrap">
-                          {ord.orderDate && (
+                          {ord.startDate && (
                             <>
-                              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-medium" title="Tanggal Order">
+                              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-medium" title="Tanggal Mulai & Selesai Order">
                                 <Calendar className="w-3 h-3 text-blue-600" />
-                                <span>{ord.orderDate}</span>
+                                <span>{ord.startDate}</span>
+                                {ord.endDate && (
+                                  <>
+                                    <span className="text-blue-400 font-bold">&rarr;</span>
+                                    <span className="text-emerald-700 font-semibold">{ord.endDate}</span>
+                                  </>
+                                )}
                               </span>
                               <span className="text-slate-300">•</span>
                             </>

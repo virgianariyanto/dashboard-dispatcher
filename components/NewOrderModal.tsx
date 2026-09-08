@@ -20,7 +20,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
   onSaveOrder,
 }) => {
   const [customer, setCustomer] = useState('');
-  const [orderDate, setOrderDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState('');
   const [pickupLocation, setPickupLocation] = useState('');
   const [dropoffLocation, setDropoffLocation] = useState('');
   const [taskType, setTaskType] = useState('Replace');
@@ -106,7 +107,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
       assignedDriverId: assignedDriver?.id,
       assignedDriverName: assignedDriver?.name,
       createdAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-      orderDate: orderDate || new Date().toISOString().split('T')[0],
+      startDate: startDate || new Date().toISOString().split('T')[0],
+      endDate: endDate || undefined,
       targetDeliveryTime: 'Dalam 2 Jam',
       taskType,
       priority,
@@ -121,7 +123,8 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
 
     // Reset form
     setCustomer('');
-    setOrderDate(new Date().toISOString().split('T')[0]);
+    setStartDate(new Date().toISOString().split('T')[0]);
+    setEndDate('');
     setPickupLocation('');
     setDropoffLocation('');
     setNotes('');
@@ -155,31 +158,46 @@ export const NewOrderModal: React.FC<NewOrderModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto text-xs text-slate-700">
           
-          {/* Customer / Pengirim & Tanggal Order */}
+          {/* Customer / Pengirim */}
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
+              Customer / Merchant Pengirim *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Contoh: PT Surya Logistik"
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+            />
+          </div>
+
+          {/* Tanggal Mulai Order & Tanggal Selesai Order */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Customer / Merchant Pengirim *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Contoh: PT Surya Logistik"
-                value={customer}
-                onChange={(e) => setCustomer(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
-              />
-            </div>
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                Tanggal Order (Order Date) *
+                Tanggal Mulai Order *
               </label>
               <input
                 type="date"
                 required
-                value={orderDate}
-                onChange={(e) => setOrderDate(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                Tanggal Selesai Order
+              </label>
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
               />
             </div>
