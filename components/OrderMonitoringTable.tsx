@@ -5,7 +5,6 @@ import {
   ClipboardList, 
   Search, 
   MapPin, 
-  Clock, 
   Calendar,
   Building2,
   CheckCircle2, 
@@ -288,7 +287,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
             <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="px-4 py-3.5">No. Order & Prioritas</th>
-                <th className="px-4 py-3.5">Customer & Waktu</th>
+                <th className="px-4 py-3.5">Customer & Jadwal</th>
                 <th className="px-4 py-3.5">Rute (Pickup &rarr; Dropoff)</th>
                 <th className="px-4 py-3.5">Jenis Tugas</th>
                 <th className="px-4 py-3.5">Driver Bertugas</th>
@@ -361,7 +360,7 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
                         )}
                       </td>
 
-                      {/* Kolom 2: Customer & Waktu */}
+                      {/* Kolom 2: Customer & Jadwal */}
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-slate-900">{ord.customer}</span>
@@ -372,29 +371,20 @@ export const OrderMonitoringTable: React.FC<OrderMonitoringTableProps> = ({
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono mt-0.5 flex-wrap">
-                          {ord.startDate && (
-                            <>
-                              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-medium" title="Tanggal Mulai & Selesai Order">
-                                <Calendar className="w-3 h-3 text-blue-600" />
-                                <span>{ord.startDate}</span>
-                                {ord.endDate && (
-                                  <>
-                                    <span className="text-blue-400 font-bold">&rarr;</span>
-                                    <span className="text-emerald-700 font-semibold">{ord.endDate}</span>
-                                  </>
-                                )}
-                              </span>
-                              <span className="text-slate-300">•</span>
-                            </>
-                          )}
-                          <div className="flex items-center gap-1 text-slate-500">
-                            <Clock className="w-3 h-3 text-slate-400" />
-                            <span>Jam: {ord.createdAt}</span>
+                        {ord.startDate && (
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono mt-0.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 font-medium" title="Tanggal Mulai & Selesai Order">
+                              <Calendar className="w-3 h-3 text-blue-600" />
+                              <span>{ord.startDate}</span>
+                              {ord.endDate && (
+                                <>
+                                  <span className="text-blue-400 font-bold">&rarr;</span>
+                                  <span className="text-emerald-700 font-semibold">{ord.endDate}</span>
+                                </>
+                              )}
+                            </span>
                           </div>
-                          <span className="text-slate-300">•</span>
-                          <span className="text-blue-600 font-medium">Target: {ord.targetDeliveryTime}</span>
-                        </div>
+                        )}
                       </td>
 
                       {/* Kolom 3: Rute Pickup -> Dropoff */}
