@@ -49,12 +49,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <h1 className="text-sm font-black tracking-tight text-slate-900 truncate">
-              DISPATCHER OPS
+              Muhammad Rafianto
             </h1>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           </div>
           <p className="text-[11px] text-slate-500 truncate">
-            Fleet Monitoring System
+            Operasional Driver & Jalur
           </p>
         </div>
       </div>
